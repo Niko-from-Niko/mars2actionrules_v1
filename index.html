@@ -25,6 +25,7 @@
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
     <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M9 19V9"/><path d="M14 19v-6"/><path d="M19 19V3"/></symbol>
     <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 5.8 1c-.6 1.1-1.9 1.4-2.4 2.5"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
     <symbol id="i-incident" viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4Z"/><path d="M12 9v5"/><path d="M12 17h.01"/></symbol>
     <symbol id="i-outage" viewBox="0 0 24 24"><path d="M6 16v-4a6 6 0 0 1 12 0v4"/><path d="M4 16h16"/><path d="M7 20h10"/><path d="M4 8 2 6"/><path d="M20 8l2-2"/><path d="M12 2v3"/></symbol>
   </svg>
@@ -450,16 +451,91 @@
 
             <div class="side-divider"></div>
 
-            <h2 class="period-title">Период активности</h2>
-            <div class="radio-row" role="radiogroup" aria-label="Период активности">
-              <button class="radio-option active" type="button" role="radio" aria-checked="true" data-period="always">
-                <span class="radio-mark"></span>
-                Постоянное (24/7)
-              </button>
-              <button class="radio-option" type="button" role="radio" aria-checked="false" data-period="periodic">
-                <span class="radio-mark"></span>
-                Периодическое
-              </button>
+            <div class="period-area">
+              <h2 class="period-title">Период активности</h2>
+              <div class="radio-row" role="radiogroup" aria-label="Период активности">
+                <button class="radio-option active" type="button" role="radio" aria-checked="true" data-period="always">
+                  <span class="radio-mark"></span>
+                  Постоянное (24/7)
+                </button>
+                <button class="radio-option" type="button" role="radio" aria-checked="false" data-period="periodic">
+                  <span class="radio-mark"></span>
+                  Периодическое
+                </button>
+              </div>
+              <div class="periodic-settings" id="periodic-settings" hidden>
+              <div class="periodic-field">
+                <div class="periodic-label">Дни недели</div>
+                <div class="weekday-row">
+                  <div class="weekday-chips" aria-label="Дни недели">
+                    <button class="weekday-button" type="button" data-weekday="mon">ПН</button>
+                    <button class="weekday-button" type="button" data-weekday="tue">ВТ</button>
+                    <button class="weekday-button" type="button" data-weekday="wed">СР</button>
+                    <button class="weekday-button" type="button" data-weekday="thu">ЧТ</button>
+                    <button class="weekday-button" type="button" data-weekday="fri">ПТ</button>
+                    <button class="weekday-button" type="button" data-weekday="sat">СБ</button>
+                    <button class="weekday-button" type="button" data-weekday="sun">ВС</button>
+                  </div>
+                  <button class="weekday-all" type="button" id="weekday-all">Выбрать все</button>
+                </div>
+                <div class="periodic-error" id="weekday-error" hidden>Выберите день недели</div>
+              </div>
+
+              <div class="periodic-field">
+                <div class="periodic-label">Часовой пояс</div>
+                <div class="period-dropdown timezone-dropdown" id="timezone-dropdown">
+                  <button class="period-select" type="button" id="timezone-trigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="period-select-value">Москва UTC(SU)+3</span>
+                    <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+                  </button>
+                  <div class="period-menu timezone-menu" role="listbox" aria-label="Часовой пояс">
+                    <button class="period-menu-option selected" type="button" role="option" aria-selected="true" data-timezone="Москва UTC(SU)+3">Москва UTC(SU)+3</button>
+                    <button class="period-menu-option" type="button" role="option" aria-selected="false" data-timezone="Калининград (MSK-1, UTC+2)">Калининград (MSK-1, UTC+2)</button>
+                    <button class="period-menu-option" type="button" role="option" aria-selected="false" data-timezone="Самара (MSK+1, UTC+4)">Самара (MSK+1, UTC+4)</button>
+                    <button class="period-menu-option" type="button" role="option" aria-selected="false" data-timezone="Екатеринбург (MSK+2, UTC+5)">Екатеринбург (MSK+2, UTC+5)</button>
+                    <button class="period-menu-option" type="button" role="option" aria-selected="false" data-timezone="Омск (MSK+3, UTC+6)">Омск (MSK+3, UTC+6)</button>
+                    <button class="period-menu-option" type="button" role="option" aria-selected="false" data-timezone="Красноярск (MSK+4, UTC+7)">Красноярск (MSK+4, UTC+7)</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="periodic-field">
+                <div class="periodic-label">Временной период</div>
+                <div class="time-period-row">
+                  <div class="time-field">
+                    <div class="period-dropdown time-dropdown" data-time-select="start">
+                      <button class="time-input-wrap" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <svg class="icon icon-sm"><use href="#i-clock"></use></svg>
+                        <span class="time-value" data-time-value>__:__</span>
+                        <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+                      </button>
+                      <div class="period-menu time-menu" role="listbox" aria-label="Время начала"></div>
+                    </div>
+                    <span class="time-caption">Время начала</span>
+                  </div>
+                  <span class="time-arrow" aria-hidden="true">→</span>
+                  <div class="time-field">
+                    <div class="period-dropdown time-dropdown" data-time-select="end">
+                      <button class="time-input-wrap" type="button" aria-haspopup="listbox" aria-expanded="false">
+                      <svg class="icon icon-sm"><use href="#i-clock"></use></svg>
+                        <span class="time-value" data-time-value>__:__</span>
+                        <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+                      </button>
+                      <div class="period-menu time-menu" role="listbox" aria-label="Время окончания"></div>
+                    </div>
+                    <span class="time-caption">Время окончания</span>
+                  </div>
+                </div>
+              </div>
+
+              <label class="unlimited-time">
+                <span class="square-check">
+                  <input type="checkbox" id="unlimited-time">
+                  <span class="square-check-box"></span>
+                </span>
+                <span>Без ограничений по времени</span>
+              </label>
+              </div>
             </div>
 
             <div class="side-divider"></div>

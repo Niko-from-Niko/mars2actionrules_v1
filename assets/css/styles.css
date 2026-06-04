@@ -443,6 +443,10 @@
       overflow: hidden;
     }
 
+    .content-grid.dropdown-open {
+      overflow: visible;
+    }
+
     .main-panel,
     .side-panel {
       border-radius: 8px;
@@ -465,6 +469,11 @@
       padding: 16px 18px;
       display: flex;
       flex-direction: column;
+    }
+
+    .side-panel.dropdown-open {
+      overflow: visible;
+      z-index: 40;
     }
 
     .step-tabs {
@@ -641,8 +650,8 @@
     .action-toolbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      justify-content: flex-start;
+      gap: 14px;
       margin-bottom: 14px;
       flex-wrap: wrap;
     }
@@ -674,11 +683,11 @@
     }
 
     .delay-settings {
-      min-width: min(100%, 360px);
-      flex: 1 1 320px;
+      min-width: 0;
+      flex: 0 1 auto;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 12px;
       color: #f0f0f2;
       flex-wrap: wrap;
@@ -687,7 +696,7 @@
     .delay-switch {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 9px;
       min-height: 40px;
       white-space: nowrap;
@@ -807,7 +816,7 @@
     .channel-body {
       min-width: 0;
       display: grid;
-      gap: 8px;
+      gap: 7px;
     }
 
     .channel-title,
@@ -820,6 +829,15 @@
       font-weight: 750;
       color: #f2f1f2;
       white-space: nowrap;
+    }
+
+    .channel-title {
+      font-size: 14px;
+    }
+
+    .channel-title .icon {
+      width: 16px;
+      height: 16px;
     }
 
     .incident-list {
@@ -885,22 +903,31 @@
     .channel-options {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      margin-left: 10px;
+      gap: 0;
+      margin-left: 8px;
       min-width: 0;
+      border-radius: 999px;
+      background: #202229;
+      padding: 2px;
     }
 
     .tiny-pill {
-      height: 22px;
-      padding: 0 9px;
+      height: 20px;
+      padding: 0 8px;
       display: inline-flex;
       align-items: center;
       border: 0;
-      color: #d2d2d8;
-      background: #35373e;
-      font-size: 12px;
+      border-radius: 999px;
+      color: #9b9ca6;
+      background: transparent;
+      font-size: 11px;
       font-weight: 750;
       white-space: nowrap;
+    }
+
+    .tiny-pill.active {
+      color: #fff;
+      background: #6b302c;
     }
 
     .tiny-pill:not(.active) {
@@ -911,6 +938,10 @@
     .tiny-pill:hover {
       color: #fff;
       background: #30323a;
+    }
+
+    .tiny-pill.active:hover {
+      background: #6b302c;
     }
 
     .select-wrap {
@@ -946,6 +977,71 @@
       min-width: 0;
     }
 
+    .select-value.has-tokens {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: hidden;
+    }
+
+    .channel .select-button {
+      min-height: 32px;
+      height: auto;
+      padding: 4px 6px;
+      border-color: #525662;
+    }
+
+    .recipient-address-input {
+      width: 100%;
+      min-height: 32px;
+      border: 1px solid #525662;
+      border-radius: var(--radius);
+      background: #111216;
+      color: #e4e5ea;
+      outline: none;
+      padding: 4px 8px;
+      font-size: 13px;
+    }
+
+    .recipient-address-input::placeholder {
+      color: #7f828d;
+    }
+
+    .recipient-address-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(255, 45, 23, .36);
+    }
+
+    .channel .select-wrap.open .select-button {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(255, 45, 23, .36);
+    }
+
+    .recipient-token {
+      min-width: 0;
+      max-width: 220px;
+      height: 22px;
+      padding: 0 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 6px;
+      background: #30333b;
+      color: #d9d9df;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 0 1 auto;
+    }
+
+    .recipient-token-x {
+      color: #8d909a;
+      font-size: 16px;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
     .menu {
       position: absolute;
       z-index: 20;
@@ -966,6 +1062,19 @@
       gap: 3px;
     }
 
+    .select-wrap.open .recipient-menu {
+      display: grid;
+      gap: 0;
+    }
+
+    .recipient-menu {
+      padding: 14px 22px 16px;
+      border: 0;
+      border-radius: 6px;
+      background: #1d1f25;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, .46);
+    }
+
     .menu button {
       width: 100%;
       min-height: 30px;
@@ -980,6 +1089,68 @@
     .menu button:hover {
       background: #262933;
       color: #fff;
+    }
+
+    .recipient-menu .recipient-row {
+      min-height: 31px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 5px;
+      color: #f4f4f6;
+      font-size: 14px;
+      line-height: 1.2;
+      padding: 4px 6px;
+    }
+
+    .recipient-menu .recipient-row:hover {
+      background: #2c3038;
+      color: #fff;
+    }
+
+    .recipient-menu .recipient-group {
+      font-weight: 650;
+    }
+
+    .recipient-users {
+      margin-top: 3px;
+      margin-left: 26px;
+      display: grid;
+      gap: 1px;
+    }
+
+    .recipient-check {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #8c909d;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      color: transparent;
+      flex: 0 0 auto;
+    }
+
+    .recipient-check .icon {
+      width: 12px;
+      height: 12px;
+      stroke-width: 3;
+    }
+
+    .recipient-row.selected .recipient-check {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .recipient-user-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .recipient-login {
+      color: #8d909a;
     }
 
     .dropdown {
@@ -1070,27 +1241,52 @@
     }
 
     .side-panel h2 {
-      margin: 0 0 18px;
-      font-size: 20px;
+      margin: 0 0 14px;
+      font-size: 18px;
       line-height: 1.2;
     }
 
     .side-divider {
       height: 1px;
       background: #202228;
-      margin: 16px 0;
+      margin: 12px 0;
     }
 
     .period-title {
-      margin: 0 0 12px;
-      font-size: 20px;
+      margin: 0 0 10px;
+      font-size: 18px;
       line-height: 1.2;
+    }
+
+    .period-area {
+      flex: 0 0 auto;
+      max-height: min(380px, 48vh);
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .period-area.periodic-open {
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .period-area.dropdown-open {
+      overflow: visible;
+    }
+
+    .period-area::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .period-area::-webkit-scrollbar-thumb {
+      background: #343741;
+      border-radius: 999px;
     }
 
     .radio-row {
       display: flex;
       align-items: center;
-      gap: 26px;
+      gap: 20px;
       flex-wrap: wrap;
     }
 
@@ -1103,11 +1299,12 @@
       gap: 9px;
       padding: 0;
       font-weight: 700;
+      font-size: 14px;
     }
 
     .radio-mark {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border: 2px solid #6a6d79;
       border-radius: 50%;
       display: grid;
@@ -1124,6 +1321,320 @@
       height: 7px;
       border-radius: 50%;
       background: var(--accent);
+    }
+
+    .periodic-settings {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      flex: 0 0 auto;
+    }
+
+    .periodic-settings[hidden] {
+      display: none;
+    }
+
+    .periodic-field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .periodic-label {
+      color: #8e909c;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .weekday-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .weekday-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .weekday-button {
+      min-width: 38px;
+      height: 30px;
+      border: 1px solid #565a66;
+      border-radius: 7px;
+      background: #101116;
+      color: #f2f2f4;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 0 9px;
+    }
+
+    .weekday-button:hover,
+    .weekday-button.active {
+      border-color: #572623;
+      background: #4b2323;
+      color: #fff;
+    }
+
+    .weekday-button.active {
+      box-shadow: none;
+    }
+
+    .weekday-all {
+      border: 0;
+      background: transparent;
+      color: #8e909c;
+      font-weight: 750;
+      padding: 0;
+      min-height: 30px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .weekday-all:hover {
+      color: #fff;
+    }
+
+    .periodic-error {
+      color: #ff3b2f;
+      font-size: 12px;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    .periodic-error[hidden] {
+      display: none;
+    }
+
+    .period-dropdown {
+      position: relative;
+      min-width: 0;
+    }
+
+    .period-select,
+    .time-input-wrap {
+      width: 100%;
+      height: 34px;
+      border: 1px solid #6c707b;
+      border-radius: 8px;
+      background: #111216;
+      color: #e4e5ea;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font: inherit;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .period-dropdown.open > .period-select,
+    .period-dropdown.open > .time-input-wrap {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 1px rgba(255, 45, 23, .34);
+    }
+
+    .period-dropdown.disabled > .period-select,
+    .period-dropdown.disabled > .time-input-wrap {
+      border-color: #3e414a;
+      background: #202228;
+      color: #626672;
+      cursor: not-allowed;
+    }
+
+    .period-select-value,
+    .time-value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .period-menu {
+      position: absolute;
+      z-index: 120;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      display: none;
+      border: 0;
+      border-radius: 12px;
+      background: #202228;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, .46);
+      padding: 18px 26px;
+    }
+
+    .period-dropdown.open .period-menu {
+      display: grid;
+    }
+
+    .period-menu-option {
+      min-height: 30px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: #f1f1f3;
+      padding: 6px 10px;
+      text-align: left;
+      font: inherit;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .period-menu-option:hover,
+    .period-menu-option.focused {
+      background: #30333b;
+    }
+
+    .period-menu-option.selected::after {
+      content: "✓";
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #28c46b;
+      font-weight: 900;
+    }
+
+    .timezone-menu {
+      max-height: 248px;
+      overflow-y: auto;
+    }
+
+    .timezone-menu::-webkit-scrollbar,
+    .time-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .timezone-menu::-webkit-scrollbar-thumb,
+    .time-menu::-webkit-scrollbar-thumb {
+      background: #363941;
+      border-radius: 999px;
+    }
+
+    .time-period-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .time-field {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .time-dropdown {
+      width: 132px;
+    }
+
+    .time-input-wrap {
+      height: 34px;
+      color: #8d909a;
+      padding: 0 10px;
+    }
+
+    .time-dropdown.has-value .time-input-wrap {
+      color: #f2f2f4;
+    }
+
+    .time-input-wrap .icon:last-child {
+      margin-left: auto;
+    }
+
+    .time-menu {
+      right: auto;
+      width: 156px;
+      max-height: 190px;
+      overflow-y: auto;
+      padding: 12px 14px;
+    }
+
+    .time-menu .period-menu-option {
+      text-align: center;
+      min-height: 32px;
+      padding: 6px 8px;
+      border: 1px solid #474b56;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .time-menu .period-menu-option.selected {
+      background: #4b2323;
+      border-color: #572623;
+    }
+
+    .time-menu .period-menu-option.selected::after {
+      display: none;
+    }
+
+    .time-caption {
+      color: #70737f;
+      font-size: 11px;
+    }
+
+    .time-arrow {
+      color: #777b86;
+      font-size: 22px;
+      line-height: 34px;
+    }
+
+    .unlimited-time {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #dcdde3;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .square-check {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+    }
+
+    .square-check input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .square-check-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #8c909d;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+    }
+
+    .square-check input:checked + .square-check-box {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .square-check input:checked + .square-check-box::after {
+      content: "";
+      width: 10px;
+      height: 6px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    .periodic-settings.time-unlimited .periodic-field:nth-of-type(2),
+    .periodic-settings.time-unlimited .periodic-field:nth-of-type(3) {
+      opacity: .62;
     }
 
     .default-area {
@@ -1605,6 +2116,20 @@
         margin-left: 0;
         width: 100%;
         flex-wrap: wrap;
+      }
+
+      .recipient-menu {
+        padding: 12px;
+      }
+
+      .recipient-menu .recipient-row {
+        min-height: 31px;
+        padding: 4px 6px;
+        font-size: 13px;
+      }
+
+      .recipient-token {
+        max-width: min(280px, 72vw);
       }
 
       .artifact-grid {
