@@ -97,8 +97,11 @@ function showToast(message) {
 }
 
 function closeMenus(except) {
-  $$(".select-wrap.open, .dropdown.open, .period-dropdown.open").forEach((node) => {
-    if (node !== except) node.classList.remove("open");
+  $$(".select-wrap.open, .dropdown.open, .period-dropdown.open, .filter-control.open").forEach((node) => {
+    if (node !== except) {
+      node.classList.remove("open");
+      $("[data-filter-trigger]", node)?.setAttribute("aria-expanded", "false");
+    }
   });
   syncPeriodDropdownLayer();
 }
@@ -302,42 +305,6 @@ function initRecipientPickers() {
   });
 }
 
-function updateStepTabsLayout() {
-  const tabs = $(".step-tabs");
-  if (!tabs) return;
-
-  const tabItems = $$(".step-tab-item", tabs).filter((item) => !item.hidden);
-  const count = tabItems.length;
-  if (!count) return;
-
-  const addButton = $("#add-step-tab");
-  const available = Math.max(0, tabs.clientWidth - (addButton?.offsetWidth || 0));
-  const gap = Math.min(4, available / Math.max(count * 18, 1));
-  const basis = Math.min(260, Math.max(0, (available - gap * count) / count));
-  const manyTabs = count > 5;
-  const activeBasis = manyTabs ? Math.min(280, basis * 1.25) : basis;
-  const inactiveBasis = manyTabs && count > 1
-    ? Math.max(0, (available - gap * count - activeBasis) / (count - 1))
-    : basis;
-
-  tabs.style.setProperty("--step-tab-gap", `${gap}px`);
-  tabs.style.setProperty("--step-tab-basis", `${manyTabs ? inactiveBasis : basis}px`);
-  tabs.style.setProperty("--step-tab-active-basis", `${activeBasis}px`);
-  tabs.classList.toggle("many-tabs", manyTabs);
-  tabs.classList.toggle("compressed", basis < 120);
-  tabs.classList.toggle("dense", basis < 72);
-
-  const activeTab = $(".step-tab-item.active", tabs);
-  const activeLeft = activeTab ? Math.max(0, activeTab.offsetLeft) : 0;
-  const activeRight = activeTab ? Math.min(tabs.clientWidth, activeTab.offsetLeft + activeTab.offsetWidth) : 0;
-  tabs.style.setProperty("--step-tab-left-line", `${activeLeft}px`);
-  tabs.style.setProperty("--step-tab-right-line-left", `${activeRight}px`);
-}
-
-function scheduleStepTabsLayout() {
-  requestAnimationFrame(updateStepTabsLayout);
-}
-
 function isEscalationStep(stepName) {
   return stepName !== "initial";
 }
@@ -436,9 +403,14 @@ function pluralize(value, forms) {
 
 function delayLabel(value) {
   const totalMinutes = Math.max(0, Math.floor(Number(value) || 0));
-  const hours = Math.floor(totalMinutes / 60);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
   const minutes = totalMinutes % 60;
   const parts = [];
+
+  if (days) {
+    parts.push(`${days} ${pluralize(days, ["день", "дня", "дней"])}`);
+  }
 
   if (hours) {
     parts.push(`${hours} ${pluralize(hours, ["час", "часа", "часов"])}`);
@@ -451,9 +423,29 @@ function delayLabel(value) {
   return parts.length ? parts.join(" ") : "0 минут";
 }
 
+const MAX_DELAY_MINUTES = 30 * 24 * 60;
+
 function normalizeDelayMinutes(value) {
   const minutes = Math.floor(Number(value) || 0);
-  return Math.max(1, minutes);
+  return Math.min(MAX_DELAY_MINUTES, Math.max(1, minutes));
+}
+
+function getDelayParts(value) {
+  const totalMinutes = normalizeDelayMinutes(value);
+  return {
+    days: Math.floor(totalMinutes / 1440),
+    hours: Math.floor((totalMinutes % 1440) / 60),
+    minutes: totalMinutes % 60
+  };
+}
+
+function getDelayInputMinutes() {
+  const readValue = (id) => Math.max(0, Math.floor(Number($(id).value) || 0));
+  return normalizeDelayMinutes(
+    readValue("#delay-days") * 1440
+    + readValue("#delay-hours") * 60
+    + readValue("#delay-minutes")
+  );
 }
 
 function renderStepSummary(stepName) {
@@ -496,18 +488,18 @@ function updateStepSummaries() {
 function updateStepName(stepName) {
   const step = ruleSteps[stepName];
   const stepNumber = getStepNumber(stepName);
-  const label = $(`[data-step-label="${stepName}"]`);
   const cardTitle = $(`[data-step-card-title="${stepName}"]`);
-  if (label) label.textContent = step.name;
   if (cardTitle && cardTitle.dataset.editing !== "true") {
     cardTitle.textContent = `Шаг ${stepNumber}: ${step.name}`;
   }
-  $$(`[data-rename-step="${stepName}"]`).forEach((button) => {
-    button.setAttribute("aria-label", `Переименовать этап ${step.name}`);
-  });
-  $$(`[data-delete-step="${stepName}"]`).forEach((button) => {
-    button.setAttribute("aria-label", `Удалить шаг ${step.name}`);
-  });
+  const cardDelete = $(`[data-card-delete-step="${stepName}"]`);
+  if (cardDelete) cardDelete.setAttribute("aria-label", `Удалить шаг ${step.name}`);
+  const currentTitle = $("#current-step-title");
+  if (currentStep === stepName && currentTitle.dataset.editing !== "true") {
+    currentTitle.textContent = `Шаг ${stepNumber}: ${step.name}`;
+    $("#rename-current-step").setAttribute("aria-label", `Переименовать этап ${step.name}`);
+    $("#delete-current-step").setAttribute("aria-label", `Удалить шаг ${step.name}`);
+  }
 }
 
 function updateStepNames() {
@@ -516,10 +508,10 @@ function updateStepNames() {
 
 function renameStep(stepName) {
   const step = ruleSteps[stepName];
-  const cardTitle = $(`[data-step-card-title="${stepName}"]`);
-  if (!step || !cardTitle) return;
+  const title = $("#current-step-title");
+  if (!step || stepName !== currentStep || !title) return;
 
-  const existingInput = $(".step-name-input", cardTitle);
+  const existingInput = $(".step-name-input", title);
   if (existingInput) {
     existingInput.focus();
     existingInput.select();
@@ -539,18 +531,18 @@ function renameStep(stepName) {
   input.value = originalName;
   input.setAttribute("aria-label", "Название этапа");
 
-  cardTitle.dataset.editing = "true";
-  cardTitle.classList.add("editing");
-  cardTitle.textContent = "";
-  cardTitle.append(prefix, input);
+  title.dataset.editing = "true";
+  title.classList.add("editing");
+  title.textContent = "";
+  title.append(prefix, input);
 
   function finishEditing(commit) {
     if (finished) return;
     finished = true;
 
     const nextName = input.value.trim();
-    delete cardTitle.dataset.editing;
-    cardTitle.classList.remove("editing");
+    delete title.dataset.editing;
+    title.classList.remove("editing");
 
     if (commit && nextName) {
       step.name = nextName;
@@ -559,7 +551,6 @@ function renameStep(stepName) {
     }
 
     updateStepName(stepName);
-    scheduleStepTabsLayout();
   }
 
   input.addEventListener("click", (event) => event.stopPropagation());
@@ -591,7 +582,8 @@ function persistCurrentStep() {
   step.notificationSettings = getNotificationSettings();
   step.recovery = $("#recovery").checked;
   step.delayEnabled = $("#delay-enabled").checked;
-  step.delayMinutes = normalizeDelayMinutes($("#delay-minutes").value);
+  step.delayMinutes = getDelayInputMinutes();
+  syncDelayStepperButtons(step);
   updateStepDelayBadge(currentStep);
   updateStepSummaries();
   updateCreateState();
@@ -606,33 +598,36 @@ function updateStepDelayBadge(stepName) {
   badge.classList.toggle("delayed", step.delayEnabled);
 }
 
+function syncDelayStepperButtons(delay) {
+  $$("[data-delay-unit]").forEach((button) => {
+    const delta = Number(button.dataset.delayDelta);
+    button.disabled = !delay.delayEnabled
+      || (delta > 0 && delay.delayMinutes >= MAX_DELAY_MINUTES)
+      || (delta < 0 && delay.delayMinutes <= 1);
+  });
+}
+
 function syncDelayUi() {
   const delay = ruleSteps[currentStep];
+  const parts = getDelayParts(delay.delayMinutes);
   $("#delay-enabled").checked = delay.delayEnabled;
-  $("#delay-minutes").value = delay.delayMinutes;
-  $("#delay-minutes").disabled = !delay.delayEnabled;
+  $("#delay-days").value = parts.days;
+  $("#delay-hours").value = parts.hours;
+  $("#delay-minutes").value = parts.minutes;
   $("#delay-input").hidden = !delay.delayEnabled;
-  $$("[data-delay-step]").forEach((button) => {
-    button.disabled = !delay.delayEnabled;
+  $$("[data-delay-value]").forEach((input) => {
+    input.disabled = !delay.delayEnabled;
   });
+  syncDelayStepperButtons(delay);
   updateStepDelayBadge(currentStep);
 }
 
 function syncStepNavigation() {
-  $$(".step-tab").forEach((tab) => {
-    const isActive = tab.dataset.stepTab === currentStep;
-    tab.classList.toggle("active", isActive);
-    tab.setAttribute("aria-selected", String(isActive));
-  });
-
-  $$(".step-tab-item").forEach((item) => {
-    item.classList.toggle("active", item.dataset.stepTabWrap === currentStep);
-  });
-
   $$(".step-card").forEach((card) => {
     card.classList.toggle("active", card.dataset.stepCard === currentStep);
   });
-  scheduleStepTabsLayout();
+  $("#delete-current-step").hidden = !isEscalationStep(currentStep);
+  updateStepName(currentStep);
 }
 
 function applyStepState(stepName) {
@@ -659,10 +654,6 @@ function applyStepState(stepName) {
   updateCreateState();
 }
 
-function bindStepTab(button) {
-  button.addEventListener("click", () => setCurrentStep(button.dataset.stepTab));
-}
-
 function bindStepCard(card) {
   card.addEventListener("click", () => setCurrentStep(card.dataset.stepCard));
   card.addEventListener("keydown", (event) => {
@@ -673,26 +664,6 @@ function bindStepCard(card) {
   });
 }
 
-function bindRenameButton(button) {
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    renameStep(button.dataset.renameStep);
-  });
-  button.addEventListener("keydown", (event) => {
-    event.stopPropagation();
-  });
-}
-
-function bindDeleteButton(button) {
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    openDeleteStepModal(button.dataset.deleteStep);
-  });
-  button.addEventListener("keydown", (event) => {
-    event.stopPropagation();
-  });
-}
-
 function createEscalationState() {
   escalationId += 1;
   stepOrder += 1;
@@ -700,7 +671,7 @@ function createEscalationState() {
   const stepName = `escalation-${escalationId}`;
   ruleSteps[stepName] = {
     exists: true,
-    name: escalationId === 1 ? "Эскалация" : `Эскалация ${escalationId}`,
+    name: `Эскалация ${escalationId}`,
     channels: new Set(),
     incidents: new Set(),
     notificationSettings: {},
@@ -713,28 +684,9 @@ function createEscalationState() {
   return stepName;
 }
 
-function renderEscalationTab(stepName) {
-  const tabWrap = document.createElement("span");
-  tabWrap.className = "step-tab-item";
-  tabWrap.dataset.stepTabWrap = stepName;
-  tabWrap.innerHTML = `
-    <button class="step-tab" type="button" role="tab" aria-selected="false" data-step-tab="${stepName}">
-      <span data-step-label="${stepName}"></span>
-    </button>
-    <button class="delete-step" type="button" data-delete-step="${stepName}">
-      <svg class="icon icon-sm"><use href="#i-close"></use></svg>
-    </button>
-  `;
-
-  $("#add-step-tab").before(tabWrap);
-  bindStepTab($(".step-tab", tabWrap));
-  bindDeleteButton($(".delete-step", tabWrap));
-  scheduleStepTabsLayout();
-}
-
 function renderEscalationCard(stepName) {
   const card = document.createElement("div");
-  card.className = "step-card";
+  card.className = "step-card escalation-step-card";
   card.setAttribute("role", "button");
   card.tabIndex = 0;
   card.dataset.stepCard = stepName;
@@ -743,10 +695,10 @@ function renderEscalationCard(stepName) {
       <span class="step-dot"></span>
       <span class="step-card-title" data-step-card-title="${stepName}"></span>
       <span class="step-card-actions">
-        <button class="card-rename-step" type="button" data-rename-step="${stepName}">
-          <svg class="icon icon-sm"><use href="#i-pencil"></use></svg>
-        </button>
         <span class="step-badge" data-step-delay-badge="${stepName}">Сейчас</span>
+        <button class="card-delete-step" type="button" data-card-delete-step="${stepName}">
+          <svg class="icon icon-sm"><use href="#i-trash"></use></svg>
+        </button>
       </span>
     </span>
     <span class="step-summary" data-step-summary="${stepName}">Действия не выбраны</span>
@@ -754,11 +706,16 @@ function renderEscalationCard(stepName) {
 
   $(".step-cards").append(card);
   bindStepCard(card);
-  bindRenameButton($("[data-rename-step]", card));
+  $("[data-card-delete-step]", card).addEventListener("click", (event) => {
+    event.stopPropagation();
+    openDeleteStepModal(stepName);
+  });
+  $("[data-card-delete-step]", card).addEventListener("keydown", (event) => {
+    event.stopPropagation();
+  });
 }
 
 function renderEscalationStep(stepName) {
-  renderEscalationTab(stepName);
   renderEscalationCard(stepName);
   updateStepName(stepName);
   updateStepDelayBadge(stepName);
@@ -766,9 +723,7 @@ function renderEscalationStep(stepName) {
 }
 
 function removeStepElements(stepName) {
-  $(`[data-step-tab-wrap="${stepName}"]`)?.remove();
   $(`[data-step-card="${stepName}"]`)?.remove();
-  scheduleStepTabsLayout();
 }
 
 function setCurrentStep(stepName) {
@@ -798,7 +753,7 @@ function closeDeleteStepModal() {
 
 function openDeleteStepModal(stepName) {
   if (stepName === "initial") {
-    showToast("Вкладку Начальные действия удалить нельзя");
+    showToast("Начальный шаг удалить нельзя");
     return;
   }
 
@@ -811,7 +766,7 @@ function openDeleteStepModal(stepName) {
 
 function deleteStep(stepName) {
   if (stepName === "initial") {
-    showToast("Вкладку Начальные действия удалить нельзя");
+    showToast("Начальный шаг удалить нельзя");
     return;
   }
 
@@ -892,16 +847,17 @@ $$(".segment").forEach((button) => {
   button.addEventListener("click", () => {
     $$(".segment").forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
-    showToast(button.dataset.mode === "advanced" ? "Включен продвинутый режим" : "Включен базовый режим");
+    const advanced = button.dataset.mode === "advanced";
+    $("#filter-row").hidden = advanced;
+    $("#advanced-filter").hidden = !advanced;
+    closeMenus();
+    if (advanced) requestAnimationFrame(() => $("#mql-query").focus());
+    showToast(advanced ? "Включен продвинутый режим" : "Включен базовый режим");
   });
 });
 
 $$(".tab").forEach((button) => {
   button.addEventListener("click", () => setCurrentTab(button.dataset.tab));
-});
-
-$$(".step-tab").forEach((button) => {
-  button.addEventListener("click", () => setCurrentStep(button.dataset.stepTab));
 });
 
 $$(".step-card").forEach((button) => {
@@ -914,28 +870,9 @@ $$(".step-card").forEach((button) => {
   });
 });
 
-$$("[data-rename-step]").forEach((button) => {
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    renameStep(button.dataset.renameStep);
-  });
-  button.addEventListener("keydown", (event) => {
-    event.stopPropagation();
-  });
-});
-
-$$("[data-delete-step]").forEach((button) => {
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    openDeleteStepModal(button.dataset.deleteStep);
-  });
-  button.addEventListener("keydown", (event) => {
-    event.stopPropagation();
-  });
-});
-
 $("#add-escalation").addEventListener("click", addEscalationStep);
-$("#add-step-tab").addEventListener("click", addEscalationStep);
+$("#rename-current-step").addEventListener("click", () => renameStep(currentStep));
+$("#delete-current-step").addEventListener("click", () => openDeleteStepModal(currentStep));
 
 $$(".check-button").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1022,6 +959,224 @@ $$("[data-preset]").forEach((button) => {
   });
 });
 
+const basicFilterState = {
+  source: new Set(),
+  severity: new Set(),
+  hosts: [],
+  tags: [],
+  more: new Set()
+};
+
+const moreFilterValues = {};
+
+const basicFilterLabels = {
+  source: "Источник",
+  severity: "Важность",
+  hosts: "Хост",
+  tags: "Теги",
+  more: "Больше"
+};
+
+function getBasicFilterCount(type) {
+  return basicFilterState[type].size ?? basicFilterState[type].length;
+}
+
+function updateClearAllFiltersVisibility() {
+  const hasStructuredFilters = ["source", "severity", "hosts", "tags"]
+    .some((type) => getBasicFilterCount(type) > 0);
+  const hasConfiguredMoreFilters = Object.keys(moreFilterValues).length > 0;
+  const hasName = $("#filter-name").value.trim().length > 0;
+  const hasExtraFilters = $$("[data-filter-chip]").length > 0;
+  const hasAnyFilter = hasStructuredFilters || hasConfiguredMoreFilters || hasName || hasExtraFilters;
+  $("[data-clear='#filter-name']").hidden = !hasName;
+  $("#clear-filters").hidden = !hasAnyFilter;
+  $("#filter-row").classList.toggle("has-clear-all", hasAnyFilter);
+}
+
+function updateBasicFilterControl(type) {
+  const control = $(`[data-filter-control="${type}"]`);
+  const count = getBasicFilterCount(type);
+  if (!control) return;
+  if (type === "more") {
+    $("[data-filter-label]", control).textContent = basicFilterLabels[type];
+    control.classList.remove("has-value");
+    updateClearAllFiltersVisibility();
+    return;
+  }
+  $("[data-filter-label]", control).textContent = count
+    ? `${basicFilterLabels[type]} (${count})`
+    : basicFilterLabels[type];
+  $("[data-filter-clear]", control).hidden = count === 0;
+  control.classList.toggle("has-value", count > 0);
+  updateClearAllFiltersVisibility();
+}
+
+function renderMoreFilterButtons() {
+  const container = $("#more-filter-buttons");
+  const iconTemplate = $(".filter-control-trigger .icon", $("[data-filter-control='more']"));
+  container.textContent = "";
+
+  Array.from(basicFilterState.more).forEach((filterName, index) => {
+    const control = document.createElement("div");
+    const trigger = document.createElement("button");
+    const triggerLabel = document.createElement("span");
+    const popover = document.createElement("div");
+    control.className = "filter-control more-value-control";
+    control.dataset.moreFilter = filterName;
+    trigger.className = "filter-control-trigger";
+    trigger.type = "button";
+    trigger.dataset.filterTrigger = "";
+    trigger.setAttribute("aria-expanded", "false");
+    triggerLabel.textContent = moreFilterValues[filterName]
+      ? `${filterName}: ${moreFilterValues[filterName]}`
+      : filterName;
+    trigger.append(triggerLabel, iconTemplate.cloneNode(true));
+    popover.className = "filter-popover";
+
+    ["Да", "Нет"].forEach((value) => {
+      const option = document.createElement("label");
+      const radio = document.createElement("input");
+      const text = document.createElement("span");
+      option.className = "filter-option";
+      radio.type = "radio";
+      radio.name = `more-filter-${index}`;
+      radio.value = value;
+      radio.checked = moreFilterValues[filterName] === value;
+      text.textContent = value;
+      radio.addEventListener("change", () => {
+        moreFilterValues[filterName] = value;
+        triggerLabel.textContent = `${filterName}: ${value}`;
+        control.classList.remove("open");
+        trigger.setAttribute("aria-expanded", "false");
+        updateClearAllFiltersVisibility();
+      });
+      option.append(radio, text);
+      popover.append(option);
+    });
+
+    trigger.addEventListener("click", (event) => {
+      const shouldOpen = !control.classList.contains("open");
+      closeMenus(shouldOpen ? control : null);
+      control.classList.toggle("open", shouldOpen);
+      trigger.setAttribute("aria-expanded", String(shouldOpen));
+      event.stopPropagation();
+    });
+    popover.addEventListener("click", (event) => event.stopPropagation());
+    control.append(trigger, popover);
+    container.append(control);
+  });
+}
+
+function renderFilterTokens(type) {
+  const list = $(`[data-filter-token-list="${type}"]`);
+  if (!list) return;
+  list.textContent = "";
+  basicFilterState[type].forEach((value) => {
+    const token = document.createElement("span");
+    const text = document.createElement("span");
+    const remove = document.createElement("button");
+    token.className = "filter-token";
+    text.className = "filter-token-text";
+    text.textContent = value;
+    remove.className = "filter-token-remove";
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", `Удалить ${value}`);
+    remove.addEventListener("click", (event) => {
+      event.stopPropagation();
+      basicFilterState[type] = basicFilterState[type].filter((item) => item !== value);
+      renderFilterTokens(type);
+      updateBasicFilterControl(type);
+    });
+    token.append(text, remove);
+    list.append(token);
+  });
+}
+
+function commitFilterTokens(input, commitRemainder = false) {
+  const type = input.dataset.filterTokenInput;
+  const parts = input.value.split(",");
+  if (!commitRemainder && parts.length === 1) return;
+  const values = (commitRemainder ? parts : parts.slice(0, -1))
+    .map((value) => value.trim())
+    .filter(Boolean);
+  basicFilterState[type] = Array.from(new Set([...basicFilterState[type], ...values]));
+  input.value = commitRemainder ? "" : parts.at(-1);
+  renderFilterTokens(type);
+  updateBasicFilterControl(type);
+}
+
+function clearBasicFilter(type) {
+  if (basicFilterState[type] instanceof Set) {
+    basicFilterState[type].clear();
+    $$("input[type='checkbox']", $(`[data-filter-control="${type}"]`)).forEach((input) => {
+      input.checked = false;
+    });
+    if (type === "more") {
+      Object.keys(moreFilterValues).forEach((key) => delete moreFilterValues[key]);
+      renderMoreFilterButtons();
+    }
+  } else {
+    basicFilterState[type] = [];
+    const input = $(`[data-filter-token-input="${type}"]`);
+    if (input) input.value = "";
+    renderFilterTokens(type);
+  }
+  updateBasicFilterControl(type);
+}
+
+$$("[data-filter-trigger]").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    const control = button.closest(".filter-control");
+    const shouldOpen = !control.classList.contains("open");
+    closeMenus(shouldOpen ? control : null);
+    control.classList.toggle("open", shouldOpen);
+    button.setAttribute("aria-expanded", String(shouldOpen));
+    if (shouldOpen) requestAnimationFrame(() => $("[data-filter-token-input]", control)?.focus());
+    event.stopPropagation();
+  });
+});
+
+$$("[data-filter-popover]").forEach((popover) => {
+  popover.addEventListener("click", (event) => event.stopPropagation());
+});
+
+$$('[data-filter-control="source"] input, [data-filter-control="severity"] input, [data-filter-control="more"] input').forEach((input) => {
+  input.addEventListener("change", () => {
+    const type = input.closest(".filter-control").dataset.filterControl;
+    if (input.checked) basicFilterState[type].add(input.value);
+    else basicFilterState[type].delete(input.value);
+    if (type === "more") {
+      if (!input.checked) delete moreFilterValues[input.value];
+      renderMoreFilterButtons();
+    }
+    updateBasicFilterControl(type);
+  });
+});
+
+$$("[data-filter-token-input]").forEach((input) => {
+  input.addEventListener("input", () => commitFilterTokens(input));
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      commitFilterTokens(input, true);
+    }
+    if (event.key === "Backspace" && !input.value && basicFilterState[input.dataset.filterTokenInput].length) {
+      basicFilterState[input.dataset.filterTokenInput].pop();
+      renderFilterTokens(input.dataset.filterTokenInput);
+      updateBasicFilterControl(input.dataset.filterTokenInput);
+    }
+  });
+  input.addEventListener("blur", () => commitFilterTokens(input, true));
+});
+
+$$("[data-filter-clear]").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    clearBasicFilter(button.dataset.filterClear);
+    event.stopPropagation();
+  });
+});
+
 $$("[data-add-chip]").forEach((button) => {
   button.addEventListener("click", () => {
     const chip = document.createElement("button");
@@ -1032,28 +1187,27 @@ $$("[data-add-chip]").forEach((button) => {
     $("#filter-row").insertBefore(chip, $(".filter-search"));
     chip.addEventListener("click", removeChip);
     button.closest(".dropdown").classList.remove("open");
+    updateClearAllFiltersVisibility();
   });
 });
 
 function removeChip(event) {
   event.currentTarget.remove();
+  updateClearAllFiltersVisibility();
   showToast("Фильтр удален");
 }
 
 $$("[data-filter-chip]").forEach((chip) => chip.addEventListener("click", removeChip));
 
 $("#clear-filters").addEventListener("click", () => {
+  ["source", "severity", "hosts", "tags"].forEach(clearBasicFilter);
+  Object.keys(moreFilterValues).forEach((key) => delete moreFilterValues[key]);
+  renderMoreFilterButtons();
+  updateBasicFilterControl("more");
   $$("[data-filter-chip]").forEach((chip) => chip.remove());
   $("#filter-name").value = "";
+  updateClearAllFiltersVisibility();
   showToast("Фильтры очищены");
-});
-
-$("#toggle-filter").addEventListener("click", () => {
-  const row = $("#filter-row");
-  row.hidden = !row.hidden;
-  $("#toggle-filter").firstChild.textContent = row.hidden
-    ? "Показать фильтр в Консоли событий"
-    : "Открыть фильтр в Консоли событий";
 });
 
 $$("[data-clear]").forEach((button) => {
@@ -1062,6 +1216,7 @@ $$("[data-clear]").forEach((button) => {
     input.value = "";
     input.focus();
     if (input.id === "rule-name") updateBreadcrumbTitle();
+    if (input.id === "filter-name") updateClearAllFiltersVisibility();
     updateCreateState();
   });
 });
@@ -1070,6 +1225,7 @@ $("#rule-name").addEventListener("input", () => {
   updateBreadcrumbTitle();
   updateCreateState();
 });
+$("#filter-name").addEventListener("input", updateClearAllFiltersVisibility);
 $("#recovery").addEventListener("change", persistCurrentStep);
 
 $("#delay-enabled").addEventListener("change", () => {
@@ -1077,19 +1233,32 @@ $("#delay-enabled").addEventListener("change", () => {
   syncDelayUi();
 });
 
-$("#delay-minutes").addEventListener("input", () => {
-  $("#delay-minutes").value = $("#delay-minutes").value.replace(/\D/g, "");
-  ruleSteps[currentStep].delayMinutes = normalizeDelayMinutes($("#delay-minutes").value);
-  persistCurrentStep();
-  syncDelayUi();
-});
-
-$$("[data-delay-step]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const nextValue = normalizeDelayMinutes($("#delay-minutes").value) + Number(button.dataset.delayStep);
-    $("#delay-minutes").value = normalizeDelayMinutes(nextValue);
+$$("[data-delay-value]").forEach((input) => {
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/\D/g, "");
+    const maximum = Number(input.dataset.delayMax);
+    if (input.value && Number(input.value) > maximum) {
+      input.value = String(maximum);
+    }
+    persistCurrentStep();
+  });
+  input.addEventListener("change", () => {
     persistCurrentStep();
     syncDelayUi();
+  });
+});
+
+$$("[data-delay-unit]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const unitMinutes = {
+      days: 1440,
+      hours: 60,
+      minutes: 5
+    }[button.dataset.delayUnit];
+    const nextValue = getDelayInputMinutes() + unitMinutes * Number(button.dataset.delayDelta);
+    ruleSteps[currentStep].delayMinutes = normalizeDelayMinutes(nextValue);
+    syncDelayUi();
+    persistCurrentStep();
   });
 });
 
@@ -1279,7 +1448,12 @@ $("#cancel").addEventListener("click", () => {
   closeMenus();
   $("#rule-name").value = "PostgreSQL Linux";
   updateBreadcrumbTitle();
-  $("#filter-name").value = "Processor";
+  $("#filter-name").value = "";
+  Object.keys(basicFilterState).forEach(clearBasicFilter);
+  $("#mql-query").value = "";
+  $$(".segment").forEach((button) => button.classList.toggle("active", button.dataset.mode === "basic"));
+  $("#filter-row").hidden = false;
+  $("#advanced-filter").hidden = true;
   $("#make-default").checked = false;
   syncDefaultField();
   $$(".radio-row [data-period]").forEach((button) => {
@@ -1350,12 +1524,6 @@ document.addEventListener("keydown", (event) => {
     closeDeleteStepModal();
   }
 });
-window.addEventListener("resize", updateStepTabsLayout);
-const stepTabsNode = $(".step-tabs");
-if (stepTabsNode && "ResizeObserver" in window) {
-  new ResizeObserver(updateStepTabsLayout).observe(stepTabsNode);
-}
-
 $("#make-default").checked = false;
 initPeriodicControls();
 syncDefaultField();
@@ -1367,4 +1535,8 @@ updateBreadcrumbTitle();
 updateStepNames();
 currentStep = "initial";
 applyStepState("initial");
-updateStepTabsLayout();
+$$("[data-filter-control] input[type='checkbox']").forEach((input) => {
+  input.checked = false;
+});
+Object.keys(basicFilterState).forEach(updateBasicFilterControl);
+updateClearAllFiltersVisibility();

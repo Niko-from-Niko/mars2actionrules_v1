@@ -20,6 +20,7 @@
     <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
     <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v5"/><path d="M14 11v5"/></symbol>
     <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4"/><path d="M15 2v4"/><path d="M9 18v4"/><path d="M15 18v4"/><path d="M2 9h4"/><path d="M2 15h4"/><path d="M18 9h4"/><path d="M18 15h4"/></symbol>
     <symbol id="i-box" viewBox="0 0 24 24"><path d="m21 8-9-5-9 5 9 5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
@@ -94,69 +95,110 @@
             </div>
           </div>
 
-          <div class="controls-right">
-            <button class="open-filter" type="button" id="toggle-filter">
-              Открыть фильтр в Консоли событий
-              <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
-            </button>
-          </div>
         </div>
 
         <div class="filter-row" id="filter-row">
-          <button class="filter-chip" type="button" data-filter-chip>
-            <span class="chip-x">×</span>
-            Источник
-            <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
-          </button>
-          <button class="filter-chip" type="button" data-filter-chip>
-            <span class="chip-x">×</span>
-            Важность
-            <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
-          </button>
-          <button class="filter-chip" type="button" data-filter-chip>
-            <span class="chip-x">×</span>
-            Хост
-            <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
-          </button>
-          <button class="filter-chip" type="button" data-filter-chip>
-            <span class="chip-x">×</span>
-            Теги
-            <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
-          </button>
+          <div class="filter-fields">
+          <div class="filter-control" data-filter-control="source">
+            <button class="filter-control-clear" type="button" aria-label="Очистить источники" data-filter-clear="source" hidden>
+              <svg class="icon icon-sm"><use href="#i-close"></use></svg>
+            </button>
+            <button class="filter-control-trigger" type="button" aria-expanded="false" data-filter-trigger="source">
+              <span data-filter-label>Источник</span>
+              <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+            </button>
+            <div class="filter-popover" data-filter-popover="source">
+              <label class="filter-option"><input type="checkbox" value="Zabbix Prod"><span>Zabbix Prod</span></label>
+              <label class="filter-option"><input type="checkbox" value="Self Zabbix"><span>Self Zabbix</span></label>
+              <label class="filter-option"><input type="checkbox" value="Twin Zabbix"><span>Twin Zabbix</span></label>
+              <label class="filter-option"><input type="checkbox" value="Victoria Metrics Prod"><span>Victoria Metrics Prod</span></label>
+            </div>
+          </div>
+
+          <div class="filter-control" data-filter-control="severity">
+            <button class="filter-control-clear" type="button" aria-label="Очистить важность" data-filter-clear="severity" hidden>
+              <svg class="icon icon-sm"><use href="#i-close"></use></svg>
+            </button>
+            <button class="filter-control-trigger" type="button" aria-expanded="false" data-filter-trigger="severity">
+              <span data-filter-label>Важность</span>
+              <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+            </button>
+            <div class="filter-popover" data-filter-popover="severity">
+              <label class="filter-option"><input type="checkbox" value="Not Classified"><span class="severity-dot severity-unclassified"></span><span>Not Classified</span></label>
+              <label class="filter-option"><input type="checkbox" value="Information"><span class="severity-dot severity-information"></span><span>Information</span></label>
+              <label class="filter-option"><input type="checkbox" value="Warning"><span class="severity-dot severity-warning"></span><span>Warning</span></label>
+              <label class="filter-option"><input type="checkbox" value="Average"><span class="severity-dot severity-average"></span><span>Average</span></label>
+              <label class="filter-option"><input type="checkbox" value="High"><span class="severity-dot severity-high"></span><span>High</span></label>
+              <label class="filter-option"><input type="checkbox" value="Disaster"><span class="severity-dot severity-disaster"></span><span>Disaster</span></label>
+            </div>
+          </div>
+
+          <div class="filter-control" data-filter-control="hosts">
+            <button class="filter-control-clear" type="button" aria-label="Очистить хосты" data-filter-clear="hosts" hidden>
+              <svg class="icon icon-sm"><use href="#i-close"></use></svg>
+            </button>
+            <button class="filter-control-trigger" type="button" aria-expanded="false" data-filter-trigger="hosts">
+              <span data-filter-label>Хост</span>
+              <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+            </button>
+            <div class="filter-popover filter-token-popover" data-filter-popover="hosts">
+              <div class="filter-token-list" data-filter-token-list="hosts"></div>
+              <input class="filter-token-input" type="text" autocomplete="off" placeholder="host-1, host-2" aria-label="Хосты через запятую" data-filter-token-input="hosts">
+            </div>
+          </div>
+
+          <div class="filter-control" data-filter-control="tags">
+            <button class="filter-control-clear" type="button" aria-label="Очистить теги" data-filter-clear="tags" hidden>
+              <svg class="icon icon-sm"><use href="#i-close"></use></svg>
+            </button>
+            <button class="filter-control-trigger" type="button" aria-expanded="false" data-filter-trigger="tags">
+              <span data-filter-label>Теги</span>
+              <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+            </button>
+            <div class="filter-popover filter-token-popover" data-filter-popover="tags">
+              <div class="filter-token-list" data-filter-token-list="tags"></div>
+              <input class="filter-token-input" type="text" autocomplete="off" placeholder="prod, database" aria-label="Теги через запятую" data-filter-token-input="tags">
+            </div>
+          </div>
           <label class="filter-search">
             <span class="filter-prefix">Название</span>
             <span class="splitter" aria-hidden="true"></span>
-            <input class="filter-input" id="filter-name" value="Processor" autocomplete="off">
-            <button class="field-clear" type="button" aria-label="Очистить фильтр" data-clear="#filter-name">
+            <input class="filter-input" id="filter-name" value="" autocomplete="off">
+            <button class="field-clear" type="button" aria-label="Очистить фильтр" data-clear="#filter-name" hidden>
               <svg class="icon icon-sm"><use href="#i-close"></use></svg>
             </button>
           </label>
-          <div class="dropdown">
-            <button class="dropdown-trigger" type="button" data-menu-trigger>
-              Больше
+          <div class="more-filter-buttons" id="more-filter-buttons"></div>
+          </div>
+          <div class="filter-control" data-filter-control="more">
+            <button class="filter-control-trigger" type="button" aria-expanded="false" data-filter-trigger="more">
+              <span data-filter-label>Больше</span>
               <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
             </button>
-            <div class="menu" role="menu">
-              <button type="button" data-add-chip="Сервис">Сервис</button>
-              <button type="button" data-add-chip="Группа">Группа</button>
-              <button type="button" data-add-chip="Код события">Код события</button>
+            <div class="filter-popover" data-filter-popover="more">
+              <label class="filter-option"><input type="checkbox" value="Мигание"><span>Мигание</span></label>
+              <label class="filter-option"><input type="checkbox" value="Инструкция"><span>Инструкция</span></label>
+              <label class="filter-option"><input type="checkbox" value="Подтверждение"><span>Подтверждение</span></label>
             </div>
           </div>
-          <button class="icon-button" type="button" id="clear-filters" aria-label="Очистить все фильтры">
+          <button class="icon-button" type="button" id="clear-filters" aria-label="Очистить все фильтры" hidden>
             <svg class="icon"><use href="#i-close"></use></svg>
           </button>
         </div>
 
+        <div class="advanced-filter" id="advanced-filter" hidden>
+          <input class="advanced-filter-input" id="mql-query" type="text" placeholder="Введите MQL запрос" aria-label="MQL запрос" autocomplete="off">
+        </div>
+
         <div class="content-grid">
           <section class="main-panel">
-            <div class="step-tabs" role="tablist" aria-label="Шаги правила">
-              <span class="step-tab-item active" data-step-tab-wrap="initial">
-                <button class="step-tab active" type="button" role="tab" aria-selected="true" data-step-tab="initial">
-                  <span data-step-label="initial">Начальные действия</span>
-                </button>
-              </span>
-              <button class="step-add" type="button" id="add-step-tab" aria-label="Добавить шаг эскалации">
-                <svg class="icon icon-sm"><use href="#i-plus"></use></svg>
+            <div class="current-step-header">
+              <h2 class="current-step-title" id="current-step-title">Шаг 1: Начальные действия</h2>
+              <button class="current-step-action" type="button" id="rename-current-step" aria-label="Переименовать этап Начальные действия" title="Переименовать шаг">
+                <svg class="icon icon-sm"><use href="#i-pencil"></use></svg>
+              </button>
+              <button class="current-step-action current-step-delete" type="button" id="delete-current-step" aria-label="Удалить шаг" title="Удалить шаг" hidden>
+                <svg class="icon icon-sm"><use href="#i-close"></use></svg>
               </button>
             </div>
 
@@ -175,15 +217,37 @@
                   </span>
                   <span>Отложенное реагирование</span>
                 </label>
-                <div class="delay-input" id="delay-input" hidden>
-                  <span class="delay-input-label">Минуты</span>
-                  <div class="delay-stepper">
-                    <button class="delay-stepper-button" type="button" aria-label="Уменьшить задержку" data-delay-step="-1">-</button>
-                    <span class="delay-divider" aria-hidden="true"></span>
-                    <input type="text" id="delay-minutes" value="60" inputmode="numeric" pattern="[0-9]*" aria-label="Количество минут задержки">
-                    <span class="delay-divider" aria-hidden="true"></span>
-                    <button class="delay-stepper-button" type="button" aria-label="Увеличить задержку" data-delay-step="1">+</button>
-                  </div>
+                <div class="delay-input" id="delay-input" aria-label="Время отложенного реагирования" hidden>
+                  <label class="delay-unit">
+                    <span class="delay-unit-label">Дни</span>
+                    <span class="delay-stepper">
+                      <button class="delay-stepper-button" type="button" aria-label="Уменьшить количество дней" data-delay-unit="days" data-delay-delta="-1">-</button>
+                      <span class="delay-divider" aria-hidden="true"></span>
+                      <input type="text" id="delay-days" value="0" inputmode="numeric" pattern="[0-9]*" maxlength="2" aria-label="Количество дней, максимум 30" data-delay-value="days" data-delay-max="30">
+                      <span class="delay-divider" aria-hidden="true"></span>
+                      <button class="delay-stepper-button" type="button" aria-label="Увеличить количество дней" data-delay-unit="days" data-delay-delta="1">+</button>
+                    </span>
+                  </label>
+                  <label class="delay-unit">
+                    <span class="delay-unit-label">Часы</span>
+                    <span class="delay-stepper">
+                      <button class="delay-stepper-button" type="button" aria-label="Уменьшить количество часов" data-delay-unit="hours" data-delay-delta="-1">-</button>
+                      <span class="delay-divider" aria-hidden="true"></span>
+                      <input type="text" id="delay-hours" value="1" inputmode="numeric" pattern="[0-9]*" maxlength="3" aria-label="Количество часов, максимум 720" data-delay-value="hours" data-delay-max="720">
+                      <span class="delay-divider" aria-hidden="true"></span>
+                      <button class="delay-stepper-button" type="button" aria-label="Увеличить количество часов" data-delay-unit="hours" data-delay-delta="1">+</button>
+                    </span>
+                  </label>
+                  <label class="delay-unit">
+                    <span class="delay-unit-label">Минуты</span>
+                    <span class="delay-stepper">
+                      <button class="delay-stepper-button" type="button" aria-label="Уменьшить количество минут на 5" data-delay-unit="minutes" data-delay-delta="-1">-</button>
+                      <span class="delay-divider" aria-hidden="true"></span>
+                      <input type="text" id="delay-minutes" value="0" inputmode="numeric" pattern="[0-9]*" maxlength="5" aria-label="Количество минут, максимум 43200" data-delay-value="minutes" data-delay-max="43200">
+                      <span class="delay-divider" aria-hidden="true"></span>
+                      <button class="delay-stepper-button" type="button" aria-label="Увеличить количество минут на 5" data-delay-unit="minutes" data-delay-delta="1">+</button>
+                    </span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -325,7 +389,10 @@
                   <span class="switch-track"></span>
                 </label>
                 <span>Получать Recovery-события</span>
-                <button class="hint" type="button" data-toast="Recovery-события отправляются при восстановлении состояния.">?</button>
+                <span class="hint-wrap">
+                  <button class="hint" type="button" aria-label="Справка о Recovery-событиях" aria-describedby="recovery-tooltip">?</button>
+                  <span class="hint-tooltip" id="recovery-tooltip" role="tooltip">Recovery-события отправляются при восстановлении состояния.</span>
+                </span>
               </div>
             </div>
 
@@ -414,6 +481,69 @@
                     <div class="incident-title incident-title-danger">
                       <svg class="icon"><use href="#i-outage"></use></svg>
                       <span>Сфера Аварии</span>
+                    </div>
+                    <div class="incident-settings" hidden>
+                      <div class="incident-field">
+                        <div class="incident-field-label">Уровень аварии</div>
+                        <div class="incident-levels" role="radiogroup" aria-label="Уровень аварии">
+                          <button class="radio-option active" type="button" role="radio" aria-checked="true" data-incident-level="degradation">
+                            <span class="radio-mark"></span>
+                            Деградация
+                          </button>
+                          <button class="radio-option" type="button" role="radio" aria-checked="false" data-incident-level="low">
+                            <span class="radio-mark"></span>
+                            Низкий
+                          </button>
+                          <button class="radio-option" type="button" role="radio" aria-checked="false" data-incident-level="medium">
+                            <span class="radio-mark"></span>
+                            Средний
+                          </button>
+                          <button class="radio-option" type="button" role="radio" aria-checked="false" data-incident-level="high">
+                            <span class="radio-mark"></span>
+                            Высокий
+                          </button>
+                          <button class="radio-option" type="button" role="radio" aria-checked="false" data-incident-level="critical">
+                            <span class="radio-mark"></span>
+                            Критичный
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="incident-fields-grid">
+                        <div class="incident-field">
+                          <div class="incident-field-label">ИТ Система<span class="required">*</span></div>
+                          <div class="select-wrap incident-required">
+                            <button class="select-button" type="button" aria-required="true">
+                              <span class="select-value">Выберите ИТ Систему</span>
+                              <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+                            </button>
+                            <div class="menu">
+                              <button type="button" data-value="PostgreSQL Linux">PostgreSQL Linux</button>
+                              <button type="button" data-value="Платформа мониторинга">Платформа мониторинга</button>
+                              <button type="button" data-value="Биллинг">Биллинг</button>
+                              <button type="button" data-value="Клиентский портал">Клиентский портал</button>
+                              <button type="button" data-value="Data Platform">Data Platform</button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="incident-field">
+                          <div class="incident-field-label">Рабочая группа<span class="required">*</span></div>
+                          <div class="select-wrap incident-required">
+                            <button class="select-button" type="button" aria-required="true">
+                              <span class="select-value">Выберите рабочую группу</span>
+                              <svg class="icon icon-sm"><use href="#i-chevron"></use></svg>
+                            </button>
+                            <div class="menu">
+                              <button type="button" data-value="Администраторы PostgreSQL">Администраторы PostgreSQL</button>
+                              <button type="button" data-value="SRE PostgreSQL">SRE PostgreSQL</button>
+                              <button type="button" data-value="DBA Core">DBA Core</button>
+                              <button type="button" data-value="Инцидент-менеджеры">Инцидент-менеджеры</button>
+                              <button type="button" data-value="Service Desk L2">Service Desk L2</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -546,9 +676,6 @@
                   <span class="step-dot"></span>
                   <span class="step-card-title" data-step-card-title="initial">Шаг 1: Начальные действия</span>
                   <span class="step-card-actions">
-                    <button class="card-rename-step" type="button" aria-label="Переименовать этап Начальные действия" data-rename-step="initial">
-                      <svg class="icon icon-sm"><use href="#i-pencil"></use></svg>
-                    </button>
                     <span class="step-badge" data-step-delay-badge="initial">Сейчас</span>
                   </span>
                 </span>
