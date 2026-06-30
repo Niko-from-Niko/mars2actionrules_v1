@@ -10,62 +10,53 @@ const channelMeta = {
   team: { label: "Команда", icon: "#i-users" },
   sms: { label: "SMS", icon: "#i-message" }
 };
-const recipientDirectory = {
-  center: {
-    group: "PostgreSQL",
-    people: [
-      { name: "Иванов Иван Иванович", login: "ivanovii" },
-      { name: "Константинопольский Константин Константинович", login: "konstantinopolskyy" },
-      { name: "Петров Алексей Петрович", login: "petrova" },
-      { name: "Фадеев Антон Николаевич", login: "fadeeva" },
-      { name: "Чернышев Артём Александрович", login: "chernishova" },
-      { name: "Королев Сергей Данилович", login: "korolevs" }
-    ]
-  },
-  email: {
-    group: "PostgreSQL",
-    people: [
-      { name: "Иванов Иван Иванович", login: "ivanovii" },
-      { name: "Константинопольский Константин Константинович", login: "konstantinopolskyy" },
-      { name: "Петров Алексей Петрович", login: "petrova" },
-      { name: "Фадеев Антон Николаевич", login: "fadeeva" },
-      { name: "Чернышев Артём Александрович", login: "chernishova" },
-      { name: "Королев Сергей Данилович", login: "korolevs" }
-    ]
-  },
-  telegram: {
-    group: "PostgreSQL",
-    people: [
-      { name: "Иванов Иван Иванович", login: "ivanovii" },
-      { name: "Константинопольский Константин Константинович", login: "konstantinopolskyy" },
-      { name: "Петров Алексей Петрович", login: "petrova" },
-      { name: "Фадеев Антон Николаевич", login: "fadeeva" },
-      { name: "Чернышев Артём Александрович", login: "chernishova" },
-      { name: "Королев Сергей Данилович", login: "korolevs" }
-    ]
-  },
-  sms: {
-    group: "PostgreSQL",
-    people: [
-      { name: "Иванов Иван Иванович", login: "ivanovii" },
-      { name: "Константинопольский Константин Константинович", login: "konstantinopolskyy" },
-      { name: "Петров Алексей Петрович", login: "petrova" },
-      { name: "Фадеев Антон Николаевич", login: "fadeeva" },
-      { name: "Чернышев Артём Александрович", login: "chernishova" },
-      { name: "Королев Сергей Данилович", login: "korolevs" }
-    ]
-  },
-  team: {
-    group: "PostgreSQL",
-    people: [
-      { name: "Иванов Иван Иванович", login: "ivanovii" },
-      { name: "Константинопольский Константин Константинович", login: "konstantinopolskyy" },
-      { name: "Петров Алексей Петрович", login: "petrova" },
-      { name: "Фадеев Антон Николаевич", login: "fadeeva" },
-      { name: "Чернышев Артём Александрович", login: "chernishova" },
-      { name: "Королев Сергей Данилович", login: "korolevs" }
-    ]
-  }
+const recipientPeople = [
+  { name: "Иванов Иван Иванович", login: "ivanovii" },
+  { name: "Константинопольский Константин Константинович", login: "konstantinopolskyy" },
+  { name: "Петров Алексей Петрович", login: "petrova" },
+  { name: "Фадеев Антон Николаевич", login: "fadeeva" },
+  { name: "Чернышев Артём Александрович", login: "chernishova" },
+  { name: "Королев Сергей Данилович", login: "korolevs" },
+  { name: "Смирнова Анна Сергеевна", login: "smirnovaa" },
+  { name: "Кузнецов Дмитрий Олегович", login: "kuznetsovdo" },
+  { name: "Попова Мария Андреевна", login: "popovama" },
+  { name: "Соколов Николай Викторович", login: "sokolovnv" },
+  { name: "Лебедева Елена Павловна", login: "lebedevaep" },
+  { name: "Новиков Максим Игоревич", login: "novikovmi" },
+  { name: "Морозова Ольга Романовна", login: "morozovaor" },
+  { name: "Волков Артём Сергеевич", login: "volkovas" },
+  { name: "Алексеева Наталья Юрьевна", login: "alekseevany" },
+  { name: "Козлов Михаил Денисович", login: "kozlovmd" }
+];
+const recipientPeopleByLogin = Object.fromEntries(
+  recipientPeople.map((person) => [person.login, person])
+);
+const selectRecipientPeople = (...logins) => logins.map((login) => recipientPeopleByLogin[login]);
+const recipientGroups = {
+  "Администраторы PostgreSQL": recipientPeople,
+  "Администраторы Oracle": selectRecipientPeople(
+    "ivanovii", "petrova", "fadeeva", "korolevs", "smirnovaa", "kuznetsovdo",
+    "popovama", "sokolovnv", "lebedevaep", "novikovmi", "morozovaor", "kozlovmd"
+  ),
+  "Администраторы Redis": selectRecipientPeople(
+    "konstantinopolskyy", "chernishova", "smirnovaa", "popovama", "sokolovnv",
+    "novikovmi", "morozovaor", "volkovas", "alekseevany"
+  ),
+  "Администраторы MySQL": selectRecipientPeople(
+    "ivanovii", "fadeeva", "korolevs", "kuznetsovdo",
+    "lebedevaep", "volkovas", "alekseevany", "kozlovmd"
+  ),
+  "Администраторы ClickHouse": selectRecipientPeople(
+    "petrova", "chernishova", "korolevs", "smirnovaa", "kuznetsovdo", "popovama",
+    "sokolovnv", "lebedevaep", "novikovmi", "morozovaor", "volkovas"
+  )
+};
+const defaultRecipientGroups = {
+  center: "Администраторы PostgreSQL",
+  email: "Администраторы Oracle",
+  telegram: "Администраторы Redis",
+  sms: "Администраторы MySQL",
+  team: "Администраторы ClickHouse"
 };
 const incidentMeta = {
   "sphere-incidents": { label: "Сфера Инциденты", icon: "#i-incident" },
@@ -78,6 +69,7 @@ const ruleSteps = {
     channels: new Set(),
     incidents: new Set(),
     notificationSettings: {},
+    incidentSettings: {},
     recovery: false,
     delayEnabled: false,
     delayMinutes: 60,
@@ -88,6 +80,7 @@ let currentStep = "initial";
 let stepPendingDelete = null;
 let escalationId = 0;
 let stepOrder = 0;
+let draggedEscalationCard = null;
 
 function showToast(message) {
   toast.textContent = message;
@@ -103,14 +96,29 @@ function closeMenus(except) {
       $("[data-filter-trigger]", node)?.setAttribute("aria-expanded", "false");
     }
   });
-  syncPeriodDropdownLayer();
+  syncDropdownLayers();
 }
 
-function syncPeriodDropdownLayer() {
-  const open = Boolean($(".period-dropdown.open"));
-  $(".content-grid")?.classList.toggle("dropdown-open", open);
-  $(".side-panel")?.classList.toggle("dropdown-open", open);
-  $(".period-area")?.classList.toggle("dropdown-open", open);
+function syncDropdownLayers() {
+  const periodDropdownOpen = Boolean($(".period-dropdown.open"));
+  const mainDropdownOpen = Boolean($(".main-panel .select-wrap.open"));
+  $(".content-grid")?.classList.toggle("dropdown-open", periodDropdownOpen || mainDropdownOpen);
+  $(".main-panel")?.classList.toggle("dropdown-open", mainDropdownOpen);
+  $(".side-panel")?.classList.toggle("dropdown-open", periodDropdownOpen);
+  $(".period-area")?.classList.toggle("dropdown-open", periodDropdownOpen);
+}
+
+function positionSelectMenu(wrap) {
+  const menu = $(".menu", wrap);
+  const boundary = $(".frame")?.getBoundingClientRect();
+  if (!menu || !boundary) return;
+
+  wrap.classList.remove("open-up");
+  const triggerRect = wrap.getBoundingClientRect();
+  const menuHeight = menu.offsetHeight;
+  const spaceBelow = boundary.bottom - triggerRect.bottom - 6;
+  const spaceAbove = triggerRect.top - boundary.top - 6;
+  wrap.classList.toggle("open-up", menuHeight > spaceBelow && spaceAbove > spaceBelow);
 }
 
 function parseRecipients(wrap) {
@@ -128,20 +136,15 @@ function setRecipients(wrap, recipients) {
 }
 
 function getRecipientConfig(channel) {
-  const fallback = recipientDirectory[channel.dataset.channel] || {
-    group: "PostgreSQL",
-    people: [
-      { name: "Иванов Иван Иванович", login: "ivanovii" },
-      { name: "Константинопольский Константин Константинович", login: "konstantinopolskyy" },
-      { name: "Петров Алексей Петрович", login: "petrova" }
-    ]
-  };
   const monitoringGroup = $(".group-field")?.dataset.selected === "true"
     ? $(".group-value")?.textContent.trim()
     : "";
+  const group = monitoringGroup
+    || defaultRecipientGroups[channel.dataset.channel]
+    || "Администраторы PostgreSQL";
   return {
-    ...fallback,
-    group: monitoringGroup || fallback.group
+    group,
+    people: recipientGroups[group] || recipientPeople.slice(0, 3)
   };
 }
 
@@ -247,6 +250,46 @@ function toggleRecipientGroup(wrap) {
   updateCreateState();
 }
 
+function renderRecipientMenu(wrap) {
+  const channel = wrap.closest(".channel");
+  const menu = $(".recipient-menu", wrap);
+  const config = getRecipientConfig(channel);
+  if (!menu || wrap.dataset.recipientGroup === config.group) return;
+
+  const availableLogins = new Set(config.people.map((person) => person.login));
+  setRecipients(
+    wrap,
+    parseRecipients(wrap).filter((login) => availableLogins.has(login))
+  );
+  wrap.dataset.recipientGroup = config.group;
+  menu.innerHTML = `
+    <button class="recipient-row recipient-group" type="button" role="checkbox" aria-checked="false" data-recipient-group>
+      <span class="recipient-check"><svg class="icon icon-sm"><use href="#i-check"></use></svg></span>
+      <span data-recipient-group-label>${config.group}</span>
+    </button>
+    <div class="recipient-users">
+      ${config.people.map((person) => `
+        <button class="recipient-row recipient-user" type="button" role="checkbox" aria-checked="false" data-recipient-user="${person.login}">
+          <span class="recipient-check"><svg class="icon icon-sm"><use href="#i-check"></use></svg></span>
+          <span class="recipient-user-text">${person.name} <span class="recipient-login">(${person.login})</span></span>
+        </button>
+      `).join("")}
+    </div>
+  `;
+
+  $("[data-recipient-group]", wrap).addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleRecipientGroup(wrap);
+  });
+
+  $$("[data-recipient-user]", wrap).forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleRecipient(wrap, button.dataset.recipientUser);
+    });
+  });
+}
+
 function initRecipientPickers() {
   $$(".channel").forEach((channel) => {
     channel.dataset.inputMode = channel.dataset.inputMode || "list";
@@ -255,7 +298,6 @@ function initRecipientPickers() {
     const menu = $(".menu", wrap);
     if (!menu) return;
 
-    const config = getRecipientConfig(channel);
     wrap.dataset.recipientPicker = "true";
     menu.classList.add("recipient-menu");
     if (!$(".recipient-address-input", wrap)) {
@@ -273,40 +315,10 @@ function initRecipientPickers() {
       });
       $(".select-button", wrap).after(input);
     }
-    menu.innerHTML = `
-      <button class="recipient-row recipient-group" type="button" role="checkbox" aria-checked="false" data-recipient-group>
-        <span class="recipient-check"><svg class="icon icon-sm"><use href="#i-check"></use></svg></span>
-        <span data-recipient-group-label>${config.group}</span>
-      </button>
-      <div class="recipient-users">
-        ${config.people.map((person) => `
-          <button class="recipient-row recipient-user" type="button" role="checkbox" aria-checked="false" data-recipient-user="${person.login}">
-            <span class="recipient-check"><svg class="icon icon-sm"><use href="#i-check"></use></svg></span>
-            <span class="recipient-user-text">${person.name} <span class="recipient-login">(${person.login})</span></span>
-          </button>
-        `).join("")}
-      </div>
-    `;
-
-    $("[data-recipient-group]", wrap).addEventListener("click", (event) => {
-      event.stopPropagation();
-      toggleRecipientGroup(wrap);
-    });
-
-    $$("[data-recipient-user]", wrap).forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        toggleRecipient(wrap, button.dataset.recipientUser);
-      });
-    });
-
+    renderRecipientMenu(wrap);
     syncRecipientMenu(wrap);
     syncRecipientInputMode(channel);
   });
-}
-
-function isEscalationStep(stepName) {
-  return stepName !== "initial";
 }
 
 function getOrderedStepNames() {
@@ -314,10 +326,6 @@ function getOrderedStepNames() {
     .filter(([, step]) => step.exists)
     .sort(([, first], [, second]) => first.order - second.order)
     .map(([stepName]) => stepName);
-}
-
-function getEscalationStepNames() {
-  return getOrderedStepNames().filter(isEscalationStep);
 }
 
 function getStepNumber(stepName) {
@@ -393,6 +401,59 @@ function applyNotificationSettings(settings = {}) {
   });
 }
 
+function initIncidentFields() {
+  $$(".incident-required .select-value").forEach((display) => {
+    display.dataset.placeholder = display.textContent.trim();
+  });
+}
+
+function getIncidentSettings() {
+  return $$(".incident-channel").reduce((settings, channel) => {
+    const activeLevel = $(".radio-option.active[data-incident-level]", channel);
+    const levelLabel = $(".incident-field-label", channel)?.textContent.trim() || "Уровень";
+    const fields = $$(".incident-fields-grid .incident-field", channel).map((field) => {
+      const wrap = $(".select-wrap", field);
+      const display = $(".select-value", field);
+      return {
+        name: $(".incident-field-label", field)?.textContent.replace("*", "").trim() || "Поле",
+        value: wrap?.dataset.selected === "true" ? display?.textContent.trim() || "" : ""
+      };
+    });
+
+    settings[channel.dataset.incidentChannel] = {
+      level: {
+        id: activeLevel?.dataset.incidentLevel || "degradation",
+        name: levelLabel,
+        value: activeLevel?.textContent.trim() || "Деградация"
+      },
+      fields
+    };
+    return settings;
+  }, {});
+}
+
+function applyIncidentSettings(settings = {}) {
+  $$(".incident-channel").forEach((channel) => {
+    const channelSettings = settings[channel.dataset.incidentChannel] || {};
+    const levelId = channelSettings.level?.id || "degradation";
+    $$(".radio-option[data-incident-level]", channel).forEach((button) => {
+      const active = button.dataset.incidentLevel === levelId;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-checked", String(active));
+    });
+
+    $$(".incident-fields-grid .incident-field", channel).forEach((field) => {
+      const wrap = $(".select-wrap", field);
+      const display = $(".select-value", field);
+      const name = $(".incident-field-label", field)?.textContent.replace("*", "").trim();
+      const value = channelSettings.fields?.find((item) => item.name === name)?.value || "";
+      display.textContent = value || display.dataset.placeholder;
+      wrap.dataset.selected = value ? "true" : "false";
+      wrap.classList.remove("open", "open-up");
+    });
+  });
+}
+
 function pluralize(value, forms) {
   const mod10 = value % 10;
   const mod100 = value % 100;
@@ -417,7 +478,7 @@ function delayLabel(value) {
   }
 
   if (minutes) {
-    parts.push(`${minutes} ${pluralize(minutes, ["минута", "минуты", "минут"])}`);
+    parts.push(`${minutes} ${pluralize(minutes, ["минуту", "минуты", "минут"])}`);
   }
 
   return parts.length ? parts.join(" ") : "0 минут";
@@ -448,6 +509,56 @@ function getDelayInputMinutes() {
   );
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function summaryIconWithTooltip(meta, rows, emptyText = "Данные не заполнены") {
+  const tooltipRows = rows.length
+    ? rows.map(({ name, value, stacked = false }) => `
+        <span class="summary-tooltip-row${stacked ? " stacked" : ""}">
+          ${name ? `<span class="summary-tooltip-label">${escapeHtml(name)}:</span>` : ""}
+          <span>${escapeHtml(value)}</span>
+        </span>
+      `).join("")
+    : `<span class="summary-tooltip-row">${escapeHtml(emptyText)}</span>`;
+
+  return `
+    <span class="summary-icon-tooltip" tabindex="0" aria-label="${escapeHtml(meta.label)}">
+      <svg class="icon icon-sm" aria-hidden="true"><use href="${meta.icon}"></use></svg>
+      <span class="summary-tooltip" role="tooltip">
+        <strong class="summary-tooltip-title">${escapeHtml(meta.label)}</strong>
+        ${tooltipRows}
+      </span>
+    </span>
+  `;
+}
+
+function positionSummaryTooltip(target) {
+  const tooltip = $(".summary-tooltip", target);
+  if (!tooltip) return;
+
+  const margin = 8;
+  const targetRect = target.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  const left = Math.min(
+    Math.max(margin, targetRect.left),
+    window.innerWidth - tooltipRect.width - margin
+  );
+  const spaceAbove = targetRect.top - margin;
+  const top = tooltipRect.height <= spaceAbove
+    ? targetRect.top - tooltipRect.height - margin
+    : Math.min(targetRect.bottom + margin, window.innerHeight - tooltipRect.height - margin);
+
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${Math.max(margin, top)}px`;
+}
+
 function renderStepSummary(stepName) {
   const summary = $(`[data-step-summary="${stepName}"]`);
   const step = ruleSteps[stepName];
@@ -455,23 +566,55 @@ function renderStepSummary(stepName) {
 
   const selectedChannels = Array.from(step.channels);
   const selectedIncidents = Array.from(step.incidents);
-  if (!selectedChannels.length && !selectedIncidents.length) {
+  const isEmpty = !selectedChannels.length && !selectedIncidents.length;
+  summary.classList.toggle("empty", isEmpty);
+  if (isEmpty) {
     summary.textContent = "Действия не выбраны";
     return;
   }
 
   const notificationIcons = selectedChannels.map((id) => {
     const meta = channelMeta[id];
-    return meta ? `<svg class="icon icon-sm" aria-label="${meta.label}"><use href="${meta.icon}"></use></svg>` : "";
+    if (!meta) return "";
+
+    const isPersonalRule = !$("#make-default").checked;
+    const settings = step.notificationSettings?.[id] || {};
+    const recipients = settings.inputMode === "address"
+      ? [settings.address].filter(Boolean)
+      : (settings.recipients || []).map((login) => recipientPeopleByLogin[login]?.name || login);
+    const rows = isPersonalRule
+      ? []
+      : recipients.map((recipient, index) => ({
+          name: index === 0 ? "Адресаты" : "",
+          value: recipient,
+          stacked: index === 0
+        }));
+    const emptyText = isPersonalRule
+      ? "Личное правило оповещений по выбранному каналу"
+      : "Данные не заполнены";
+    return summaryIconWithTooltip(meta, rows, emptyText);
   }).join("");
   const incidentIcons = selectedIncidents.map((id) => {
     const meta = incidentMeta[id];
-    return meta ? `<svg class="icon icon-sm" aria-label="${meta.label}"><use href="${meta.icon}"></use></svg>` : "";
+    if (!meta) return "";
+
+    const settings = step.incidentSettings?.[id] || {};
+    const rows = [];
+    if (settings.level?.value) {
+      rows.push({ name: settings.level.name, value: settings.level.value });
+    }
+    (settings.fields || []).forEach((field) => {
+      if (field.value) rows.push({ name: field.name, value: field.value });
+    });
+    return summaryIconWithTooltip(meta, rows);
   }).join("");
   const lines = [];
 
   if (notificationIcons) {
-    lines.push(`<span class="summary-line"><span>Оповещения:</span><span class="summary-icons">${notificationIcons}</span></span>`);
+    const recoveryIndicator = step.recovery
+      ? '<span class="summary-recovery-indicator" role="img" aria-label="Recovery-события включены" title="Recovery-события включены"></span>'
+      : "";
+    lines.push(`<span class="summary-line"><span>Оповещения:</span><span class="summary-icons">${notificationIcons}${recoveryIndicator}</span></span>`);
   }
 
   if (incidentIcons) {
@@ -494,6 +637,8 @@ function updateStepName(stepName) {
   }
   const cardDelete = $(`[data-card-delete-step="${stepName}"]`);
   if (cardDelete) cardDelete.setAttribute("aria-label", `Удалить шаг ${step.name}`);
+  const dragHandle = $(`[data-drag-step="${stepName}"]`);
+  if (dragHandle) dragHandle.setAttribute("aria-label", `Переместить шаг ${step.name}`);
   const currentTitle = $("#current-step-title");
   if (currentStep === stepName && currentTitle.dataset.editing !== "true") {
     currentTitle.textContent = `Шаг ${stepNumber}: ${step.name}`;
@@ -580,6 +725,7 @@ function persistCurrentStep() {
   step.channels = new Set(getActiveChannelIds());
   step.incidents = new Set(getActiveIncidentIds());
   step.notificationSettings = getNotificationSettings();
+  step.incidentSettings = getIncidentSettings();
   step.recovery = $("#recovery").checked;
   step.delayEnabled = $("#delay-enabled").checked;
   step.delayMinutes = getDelayInputMinutes();
@@ -626,7 +772,7 @@ function syncStepNavigation() {
   $$(".step-card").forEach((card) => {
     card.classList.toggle("active", card.dataset.stepCard === currentStep);
   });
-  $("#delete-current-step").hidden = !isEscalationStep(currentStep);
+  syncStepDeletionState();
   updateStepName(currentStep);
 }
 
@@ -645,6 +791,7 @@ function applyStepState(stepName) {
     button.setAttribute("aria-pressed", String(active));
   });
   applyNotificationSettings(step.notificationSettings);
+  applyIncidentSettings(step.incidentSettings);
   $("#recovery").checked = step.recovery;
   syncStepNavigation();
   syncDelayUi();
@@ -664,6 +811,153 @@ function bindStepCard(card) {
   });
 }
 
+function getEscalationCards() {
+  return $$(".step-card", $(".step-cards"));
+}
+
+function isTopStep(stepName) {
+  return getEscalationCards()[0]?.dataset.stepCard === stepName;
+}
+
+function syncStepDeletionState() {
+  getEscalationCards().forEach((card, index) => {
+    const button = $("[data-card-delete-step]", card);
+    if (button) button.hidden = index === 0;
+  });
+  $("#delete-current-step").hidden = isTopStep(currentStep);
+}
+
+function syncEscalationDragState() {
+  const enabled = getEscalationCards().length >= 2;
+  getEscalationCards().forEach((card) => {
+    card.classList.toggle("drag-enabled", enabled);
+    const handle = $("[data-drag-step]", card);
+    handle.hidden = !enabled;
+    handle.draggable = enabled;
+  });
+}
+
+function persistEscalationCardOrder() {
+  const cards = getEscalationCards();
+  cards.forEach((card, index) => {
+    ruleSteps[card.dataset.stepCard].order = index;
+  });
+  stepOrder = Math.max(0, cards.length - 1);
+  updateStepNames();
+  syncStepDeletionState();
+}
+
+function clearStepDropIndicators() {
+  getEscalationCards().forEach((card) => {
+    card.classList.remove("drop-before", "drop-after");
+  });
+}
+
+function captureStepCardPositions() {
+  return new Map(getEscalationCards().map((card) => [card, card.getBoundingClientRect().top]));
+}
+
+function animateStepCardShift(previousPositions) {
+  getEscalationCards().forEach((card) => {
+    if (card === draggedEscalationCard) return;
+    const previousTop = previousPositions.get(card);
+    if (previousTop === undefined) return;
+    const delta = previousTop - card.getBoundingClientRect().top;
+    if (!delta || typeof card.animate !== "function") return;
+    card.animate(
+      [{ transform: `translateY(${delta}px)` }, { transform: "translateY(0)" }],
+      { duration: 120, easing: "cubic-bezier(.2, .8, .2, 1)" }
+    );
+  });
+}
+
+function finishStepCardShiftAnimations() {
+  getEscalationCards().forEach((card) => {
+    if (typeof card.getAnimations !== "function") return;
+    card.getAnimations().forEach((animation) => animation.cancel());
+  });
+}
+
+function moveEscalationCard(card, direction) {
+  const cards = getEscalationCards();
+  const currentIndex = cards.indexOf(card);
+  const nextIndex = currentIndex + direction;
+  if (nextIndex < 0 || nextIndex >= cards.length) return;
+
+  const target = cards[nextIndex];
+  if (direction < 0) target.before(card);
+  else target.after(card);
+  persistEscalationCardOrder();
+  $("[data-drag-step]", card).focus();
+}
+
+function bindEscalationDrag(card) {
+  const handle = $("[data-drag-step]", card);
+
+  handle.addEventListener("click", (event) => event.stopPropagation());
+  handle.addEventListener("keydown", (event) => {
+    event.stopPropagation();
+    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault();
+      moveEscalationCard(card, event.key === "ArrowUp" ? -1 : 1);
+    }
+  });
+  handle.addEventListener("dragstart", (event) => {
+    if (getEscalationCards().length < 2) {
+      event.preventDefault();
+      return;
+    }
+    draggedEscalationCard = card;
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", card.dataset.stepCard);
+    event.dataTransfer.setDragImage(card, 24, card.offsetHeight / 2);
+    requestAnimationFrame(() => card.classList.add("dragging"));
+  });
+  handle.addEventListener("dragend", () => {
+    const shouldPersist = draggedEscalationCard === card;
+    finishStepCardShiftAnimations();
+    card.classList.remove("dragging");
+    clearStepDropIndicators();
+    draggedEscalationCard = null;
+    if (shouldPersist) persistEscalationCardOrder();
+  });
+
+  card.addEventListener("dragover", (event) => {
+    if (!draggedEscalationCard || draggedEscalationCard === card) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    const insertBefore = event.clientY < card.getBoundingClientRect().top + card.offsetHeight / 2;
+    clearStepDropIndicators();
+    card.classList.add(insertBefore ? "drop-before" : "drop-after");
+    const reference = insertBefore ? card : card.nextElementSibling;
+    if (reference !== draggedEscalationCard && draggedEscalationCard.nextElementSibling !== reference) {
+      const previousPositions = captureStepCardPositions();
+      $(".step-cards").insertBefore(draggedEscalationCard, reference);
+      animateStepCardShift(previousPositions);
+    }
+  });
+  card.addEventListener("drop", (event) => {
+    if (!draggedEscalationCard) return;
+    event.preventDefault();
+    const droppedCard = draggedEscalationCard;
+    finishStepCardShiftAnimations();
+    clearStepDropIndicators();
+    droppedCard.classList.remove("dragging");
+    draggedEscalationCard = null;
+    persistEscalationCardOrder();
+  });
+}
+
+function bindStepDelete(card) {
+  const button = $("[data-card-delete-step]", card);
+  if (!button) return;
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openDeleteStepModal(card.dataset.stepCard);
+  });
+  button.addEventListener("keydown", (event) => event.stopPropagation());
+}
+
 function createEscalationState() {
   escalationId += 1;
   stepOrder += 1;
@@ -675,6 +969,7 @@ function createEscalationState() {
     channels: new Set(),
     incidents: new Set(),
     notificationSettings: {},
+    incidentSettings: {},
     recovery: false,
     delayEnabled: false,
     delayMinutes: 60,
@@ -692,7 +987,12 @@ function renderEscalationCard(stepName) {
   card.dataset.stepCard = stepName;
   card.innerHTML = `
     <span class="step-card-head">
-      <span class="step-dot"></span>
+      <span class="step-card-leading">
+        <button class="card-drag-handle" type="button" draggable="false" data-drag-step="${stepName}" aria-label="Переместить шаг ${stepName}" title="Переместить шаг" hidden>
+          <svg class="icon icon-sm"><use href="#i-grip"></use></svg>
+        </button>
+        <span class="step-dot"></span>
+      </span>
       <span class="step-card-title" data-step-card-title="${stepName}"></span>
       <span class="step-card-actions">
         <span class="step-badge" data-step-delay-badge="${stepName}">Сейчас</span>
@@ -706,13 +1006,10 @@ function renderEscalationCard(stepName) {
 
   $(".step-cards").append(card);
   bindStepCard(card);
-  $("[data-card-delete-step]", card).addEventListener("click", (event) => {
-    event.stopPropagation();
-    openDeleteStepModal(stepName);
-  });
-  $("[data-card-delete-step]", card).addEventListener("keydown", (event) => {
-    event.stopPropagation();
-  });
+  bindEscalationDrag(card);
+  bindStepDelete(card);
+  syncEscalationDragState();
+  syncStepDeletionState();
 }
 
 function renderEscalationStep(stepName) {
@@ -724,6 +1021,7 @@ function renderEscalationStep(stepName) {
 
 function removeStepElements(stepName) {
   $(`[data-step-card="${stepName}"]`)?.remove();
+  syncEscalationDragState();
 }
 
 function setCurrentStep(stepName) {
@@ -752,8 +1050,8 @@ function closeDeleteStepModal() {
 }
 
 function openDeleteStepModal(stepName) {
-  if (stepName === "initial") {
-    showToast("Начальный шаг удалить нельзя");
+  if (isTopStep(stepName)) {
+    showToast("Верхний шаг удалить нельзя");
     return;
   }
 
@@ -765,8 +1063,8 @@ function openDeleteStepModal(stepName) {
 }
 
 function deleteStep(stepName) {
-  if (stepName === "initial") {
-    showToast("Начальный шаг удалить нельзя");
+  if (isTopStep(stepName)) {
+    showToast("Верхний шаг удалить нельзя");
     return;
   }
 
@@ -776,17 +1074,34 @@ function deleteStep(stepName) {
     persistCurrentStep();
   }
 
-  if (currentStep === stepName) {
-    currentStep = "initial";
-  }
+  const card = $(`[data-step-card="${stepName}"]`);
+  const fallbackStep = card?.previousElementSibling?.dataset.stepCard
+    || card?.nextElementSibling?.dataset.stepCard;
 
   removeStepElements(stepName);
-  delete ruleSteps[stepName];
-  updateStepNames();
+  if (stepName === "initial") ruleSteps.initial.exists = false;
+  else delete ruleSteps[stepName];
+  if (currentStep === stepName) currentStep = fallbackStep;
+  persistEscalationCardOrder();
   applyStepState(currentStep);
-  syncChannelSettings();
-  updateCreateState();
-  showToast("Шаг эскалации удален");
+  showToast("Шаг удален");
+}
+
+function resetChannelSelections() {
+  $$(".channel").forEach((channel) => {
+    const checkbox = $(".check-button", channel);
+    checkbox.classList.remove("active");
+    checkbox.setAttribute("aria-pressed", "false");
+
+    const picker = $(".select-wrap[data-recipient-picker='true']", channel);
+    if (!picker) return;
+
+    setRecipients(picker, []);
+    picker.dataset.addressValue = "";
+    picker.classList.remove("open", "open-up");
+    const addressInput = $(".recipient-address-input", picker);
+    if (addressInput) addressInput.value = "";
+  });
 }
 
 function syncChannelSettings() {
@@ -801,10 +1116,12 @@ function syncChannelSettings() {
     });
     const picker = $(".select-wrap[data-recipient-picker='true']", channel);
     if (picker) {
+      renderRecipientMenu(picker);
       syncRecipientMenu(picker);
       syncRecipientInputMode(channel);
     }
   });
+  syncDropdownLayers();
 }
 
 function syncIncidentChannels() {
@@ -818,6 +1135,7 @@ function syncIncidentChannels() {
       }
     }
   });
+  syncDropdownLayers();
 }
 
 function setCurrentTab(name) {
@@ -831,6 +1149,7 @@ function setCurrentTab(name) {
   });
 }
 
+initIncidentFields();
 initRecipientPickers();
 
 $$(".nav, .brand").forEach((button) => {
@@ -860,15 +1179,13 @@ $$(".tab").forEach((button) => {
   button.addEventListener("click", () => setCurrentTab(button.dataset.tab));
 });
 
-$$(".step-card").forEach((button) => {
-  button.addEventListener("click", () => setCurrentStep(button.dataset.stepCard));
-  button.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setCurrentStep(button.dataset.stepCard);
-    }
-  });
+$$(".step-card").forEach((card) => {
+  bindStepCard(card);
+  bindEscalationDrag(card);
+  bindStepDelete(card);
 });
+syncEscalationDragState();
+syncStepDeletionState();
 
 $("#add-escalation").addEventListener("click", addEscalationStep);
 $("#rename-current-step").addEventListener("click", () => renameStep(currentStep));
@@ -916,6 +1233,8 @@ $$(".select-button").forEach((button) => {
     }
     closeMenus(wrap);
     wrap.classList.toggle("open");
+    syncDropdownLayers();
+    if (wrap.classList.contains("open")) positionSelectMenu(wrap);
     event.stopPropagation();
   });
 });
@@ -928,7 +1247,9 @@ $$(".select-wrap .menu button").forEach((button) => {
     const display = $(".select-value", wrap);
     const groupValue = $(".group-value", wrap);
     if (groupValue) {
+      const previousGroup = groupValue.textContent.trim();
       groupValue.textContent = value;
+      if (previousGroup && previousGroup !== value) resetChannelSelections();
     } else if (display) {
       display.textContent = value;
     }
@@ -986,8 +1307,7 @@ function updateClearAllFiltersVisibility() {
     .some((type) => getBasicFilterCount(type) > 0);
   const hasConfiguredMoreFilters = Object.keys(moreFilterValues).length > 0;
   const hasName = $("#filter-name").value.trim().length > 0;
-  const hasExtraFilters = $$("[data-filter-chip]").length > 0;
-  const hasAnyFilter = hasStructuredFilters || hasConfiguredMoreFilters || hasName || hasExtraFilters;
+  const hasAnyFilter = hasStructuredFilters || hasConfiguredMoreFilters || hasName;
   $("[data-clear='#filter-name']").hidden = !hasName;
   $("#clear-filters").hidden = !hasAnyFilter;
   $("#filter-row").classList.toggle("has-clear-all", hasAnyFilter);
@@ -1177,34 +1497,11 @@ $$("[data-filter-clear]").forEach((button) => {
   });
 });
 
-$$("[data-add-chip]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const chip = document.createElement("button");
-    chip.className = "filter-chip";
-    chip.type = "button";
-    chip.dataset.filterChip = "";
-    chip.innerHTML = '<span class="chip-x">×</span>' + button.dataset.addChip + '<svg class="icon icon-sm"><use href="#i-chevron"></use></svg>';
-    $("#filter-row").insertBefore(chip, $(".filter-search"));
-    chip.addEventListener("click", removeChip);
-    button.closest(".dropdown").classList.remove("open");
-    updateClearAllFiltersVisibility();
-  });
-});
-
-function removeChip(event) {
-  event.currentTarget.remove();
-  updateClearAllFiltersVisibility();
-  showToast("Фильтр удален");
-}
-
-$$("[data-filter-chip]").forEach((chip) => chip.addEventListener("click", removeChip));
-
 $("#clear-filters").addEventListener("click", () => {
   ["source", "severity", "hosts", "tags"].forEach(clearBasicFilter);
   Object.keys(moreFilterValues).forEach((key) => delete moreFilterValues[key]);
   renderMoreFilterButtons();
   updateBasicFilterControl("more");
-  $$("[data-filter-chip]").forEach((chip) => chip.remove());
   $("#filter-name").value = "";
   updateClearAllFiltersVisibility();
   showToast("Фильтры очищены");
@@ -1284,6 +1581,7 @@ function syncUnlimitedTime() {
       trigger.setAttribute("aria-expanded", "false");
     }
   });
+  syncDropdownLayers();
 }
 
 function getSelectedWeekdays() {
@@ -1360,7 +1658,7 @@ function initPeriodicControls() {
       closeMenus(dropdown);
       dropdown.classList.toggle("open", nextOpen);
       trigger.setAttribute("aria-expanded", String(nextOpen));
-      syncPeriodDropdownLayer();
+      syncDropdownLayers();
       event.stopPropagation();
     });
   });
@@ -1369,7 +1667,7 @@ function initPeriodicControls() {
     option.addEventListener("click", (event) => {
       setTimezone(option.dataset.timezone);
       option.closest(".period-dropdown").classList.remove("open");
-      syncPeriodDropdownLayer();
+      syncDropdownLayers();
       event.stopPropagation();
     });
   });
@@ -1379,7 +1677,7 @@ function initPeriodicControls() {
       const dropdown = option.closest(".time-dropdown");
       setTimeValue(dropdown, option.dataset.time);
       dropdown.classList.remove("open");
-      syncPeriodDropdownLayer();
+      syncDropdownLayers();
       event.stopPropagation();
     });
   });
@@ -1393,7 +1691,11 @@ $$(".radio-option").forEach((button) => {
       option.classList.toggle("active", active);
       option.setAttribute("aria-checked", String(active));
     });
-    syncPeriodicSettings();
+    if (button.dataset.incidentLevel) {
+      persistCurrentStep();
+    } else {
+      syncPeriodicSettings();
+    }
   });
 });
 
@@ -1428,6 +1730,7 @@ function syncDefaultField() {
 $("#make-default").addEventListener("change", () => {
   syncDefaultField();
   syncChannelSettings();
+  updateStepSummaries();
 });
 
 $("#delete-step-cancel").addEventListener("click", closeDeleteStepModal);
@@ -1446,67 +1749,8 @@ $("#delete-step-modal").addEventListener("click", (event) => {
 
 $("#cancel").addEventListener("click", () => {
   closeMenus();
-  $("#rule-name").value = "PostgreSQL Linux";
-  updateBreadcrumbTitle();
-  $("#filter-name").value = "";
-  Object.keys(basicFilterState).forEach(clearBasicFilter);
-  $("#mql-query").value = "";
-  $$(".segment").forEach((button) => button.classList.toggle("active", button.dataset.mode === "basic"));
-  $("#filter-row").hidden = false;
-  $("#advanced-filter").hidden = true;
-  $("#make-default").checked = false;
-  syncDefaultField();
-  $$(".radio-row [data-period]").forEach((button) => {
-    const active = button.dataset.period === "always";
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-checked", String(active));
-  });
-  $$(".weekday-button").forEach((button) => button.classList.remove("active"));
-  $("#weekday-error").hidden = true;
-  setTimezone("Москва UTC(SU)+3");
-  $$(".time-dropdown").forEach((dropdown) => setTimeValue(dropdown, ""));
-  $("#unlimited-time").checked = false;
-  syncPeriodicSettings();
-  syncUnlimitedTime();
-  ruleSteps.initial.channels.clear();
-  ruleSteps.initial.incidents.clear();
-  ruleSteps.initial.notificationSettings = {};
-  ruleSteps.initial.recovery = false;
-  ruleSteps.initial.delayEnabled = false;
-  ruleSteps.initial.delayMinutes = 60;
-  ruleSteps.initial.name = "Начальные действия";
-  getEscalationStepNames().forEach((stepName) => {
-    removeStepElements(stepName);
-    delete ruleSteps[stepName];
-  });
-  escalationId = 0;
-  stepOrder = 0;
-  currentStep = "initial";
-  updateStepNames();
-  $$(".select-wrap").forEach((wrap) => {
-    delete wrap.dataset.selected;
-    delete wrap.dataset.selectedRecipients;
-    if (wrap.dataset.recipientPicker === "true") {
-      const channel = wrap.closest(".channel");
-      channel.dataset.inputMode = "list";
-      wrap.dataset.addressValue = "";
-      const addressInput = $(".recipient-address-input", wrap);
-      if (addressInput) addressInput.value = "";
-      $$(".tiny-pill", channel).forEach((pill, index) => pill.classList.toggle("active", index === 0));
-      syncRecipientMenu(wrap);
-      syncRecipientInputMode(channel);
-    }
-  });
-  $$(".check-button").forEach((button) => {
-    button.classList.remove("active");
-    button.setAttribute("aria-pressed", "false");
-  });
-  $("#recovery").checked = false;
-  applyStepState("initial");
-  syncChannelSettings();
-  syncIncidentChannels();
-  updateCreateState();
-  showToast("Изменения отменены");
+  closeDeleteStepModal();
+  window.history.back();
 });
 
 $("#create").addEventListener("click", () => {
@@ -1518,6 +1762,41 @@ $$("[data-toast]").forEach((button) => {
 });
 
 document.addEventListener("click", () => closeMenus());
+let activeSummaryTooltipTarget = null;
+document.addEventListener("mouseover", (event) => {
+  const target = event.target.closest?.(".summary-icon-tooltip");
+  if (!target) return;
+  activeSummaryTooltipTarget = target;
+  positionSummaryTooltip(target);
+});
+document.addEventListener("mouseout", (event) => {
+  if (activeSummaryTooltipTarget && !activeSummaryTooltipTarget.contains(event.relatedTarget)) {
+    activeSummaryTooltipTarget = null;
+  }
+});
+document.addEventListener("focusin", (event) => {
+  const target = event.target.closest?.(".summary-icon-tooltip");
+  if (!target) return;
+  activeSummaryTooltipTarget = target;
+  positionSummaryTooltip(target);
+});
+document.addEventListener("focusout", (event) => {
+  if (activeSummaryTooltipTarget && !activeSummaryTooltipTarget.contains(event.relatedTarget)) {
+    activeSummaryTooltipTarget = null;
+  }
+});
+document.addEventListener("scroll", () => {
+  if (activeSummaryTooltipTarget?.isConnected) {
+    positionSummaryTooltip(activeSummaryTooltipTarget);
+  }
+}, true);
+window.addEventListener("resize", () => {
+  const openSelect = $(".select-wrap.open");
+  if (openSelect) positionSelectMenu(openSelect);
+  if (activeSummaryTooltipTarget?.isConnected) {
+    positionSummaryTooltip(activeSummaryTooltipTarget);
+  }
+});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeMenus();
